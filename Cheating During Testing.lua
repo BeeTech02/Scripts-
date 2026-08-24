@@ -1,11 +1,12 @@
 -- ============================================================================
--- XORQEN HUB — DIRECT LUA BUILDER (FULLY FUNCTIONAL MOBILE ENGINE)
+-- XORQEN HUB — DIRECT LUA BUILDER (4 FEATURE COMPACT ENGINE)
 -- Target Game: Cheating During Testing [BETA] (Roblox)
+-- Architecture: Mobile Compact UI with 4 Simple On/Off Switches
 -- ============================================================================
 
 local Core = {
     Config = {
-        Version = "1.6.0-Mobile",
+        Version = "1.7.0-Mobile",
         Theme = {
             Background = Color3.fromRGB(13, 17, 23),
             Card = Color3.fromRGB(22, 27, 34),
@@ -14,13 +15,15 @@ local Core = {
             Muted = Color3.fromRGB(120, 140, 160),
             ToggleOff = Color3.fromRGB(50, 60, 75),
             ToggleOn = Color3.fromRGB(0, 240, 255),
-            Warning = Color3.fromRGB(255, 170, 0)
+            Warning = Color3.fromRGB(255, 170, 0),
+            Danger = Color3.fromRGB(255, 50, 50)
         }
     },
     State = {
         DeskSnapping = false,
         TeacherPositionTracking = false,
-        AntiDetect = true
+        AntiDetect = true,
+        TeacherPatrols = false
     },
     Services = {
         Players = game:GetService("Players"),
@@ -158,7 +161,6 @@ function Features.InitAntiDetect()
 
         local char = GameAdapter.GetCharacter()
         if char then
-            -- Clear detection triggers / suspicion tags on local player
             for _, child in ipairs(char:GetChildren()) do
                 if child.Name:lower():find("suspicion") or child.Name:lower():find("detected") or child.Name:lower():find("alert") then
                     child:Destroy()
@@ -167,7 +169,6 @@ function Features.InitAntiDetect()
         end
     end)
 
-    -- Hook Metatable Safely
     task.spawn(function()
         local rawMeta = getrawmetatable or debug.getmetatable
         if rawMeta and setreadonly then
@@ -188,21 +189,59 @@ function Features.InitAntiDetect()
     end)
 end
 
+-- 4. Teacher Patrols Tracer Line
+local PatrolTracer = Drawing and Drawing.new and Drawing.new("Line") or nil
+if PatrolTracer then
+    PatrolTracer.Thickness = 2
+    PatrolTracer.Color = Core.Config.Theme.Danger
+end
+
+function Features.InitTeacherPatrols()
+    Core.Connections.Patrols = Core.Services.RunService.RenderStepped:Connect(function()
+        if not PatrolTracer then return end
+        if not Core.State.TeacherPatrols then
+            PatrolTracer.Visible = false
+            return
+        end
+
+        local teacher = GameAdapter.FindTeacher()
+        local camera = Core.Services.Workspace.CurrentCamera
+
+        if teacher and camera then
+            local targetPart = teacher:FindFirstChild("HumanoidRootPart") or teacher:FindFirstChild("Head")
+            if targetPart then
+                local pos, visible = camera:WorldToViewportPoint(targetPart.Position)
+                if visible then
+                    PatrolTracer.Visible = true
+                    PatrolTracer.From = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y)
+                    PatrolTracer.To = Vector2.new(pos.X, pos.Y)
+                else
+                    PatrolTracer.Visible = false
+                end
+            else
+                PatrolTracer.Visible = false
+            end
+        else
+            PatrolTracer.Visible = false
+        end
+    end)
+end
+
 -- ============================================================================
--- MOBILE UI ENGINE
+-- MOBILE UI ENGINE (4 SWITCHES LAYOUT)
 -- ============================================================================
 local UI = {}
 
 function UI.CreateToggleSwitchRow(parent, labelText, stateKey, onToggleCallback)
     local row = Instance.new("Frame")
-    row.Size = UDim2.new(1, 0, 0, 42)
+    row.Size = UDim2.new(1, 0, 0, 40)
     row.BackgroundTransparency = 1
     row.Parent = parent
 
     local label = Instance.new("TextLabel")
     label.Text = labelText
     label.Font = Enum.Font.GothamBold
-    label.TextSize = 14
+    label.TextSize = 13
     label.TextColor3 = Core.Config.Theme.Text
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Position = UDim2.new(0, 8, 0, 0)
@@ -257,8 +296,8 @@ function UI.BuildMobileUI()
 
     local Main = Instance.new("Frame")
     Main.Name = "MainWindow"
-    Main.Size = UDim2.new(0, 310, 0, 220)
-    Main.Position = UDim2.new(0.5, -155, 0.5, -110)
+    Main.Size = UDim2.new(0, 310, 0, 250)
+    Main.Position = UDim2.new(0.5, -155, 0.5, -125)
     Main.BackgroundColor3 = Core.Config.Theme.Background
     Main.BorderSizePixel = 0
     Main.Active = true
@@ -280,25 +319,27 @@ function UI.BuildMobileUI()
     Header.TextSize = 16
     Header.TextColor3 = Core.Config.Theme.Text
     Header.TextXAlignment = Enum.TextXAlignment.Left
-    Header.Position = UDim2.new(0, 14, 0, 12)
+    Header.Position = UDim2.new(0, 14, 0, 10)
     Header.Size = UDim2.new(1, -28, 0, 20)
     Header.BackgroundTransparency = 1
     Header.Parent = Main
 
     local Container = Instance.new("Frame")
-    Container.Size = UDim2.new(1, -28, 1, -44)
-    Container.Position = UDim2.new(0, 14, 0, 38)
+    Container.Size = UDim2.new(1, -28, 1, -40)
+    Container.Position = UDim2.new(0, 14, 0, 34)
     Container.BackgroundTransparency = 1
     Container.Parent = Main
 
     local layout = Instance.new("UIListLayout")
     layout.SortOrder = Enum.SortOrder.LayoutOrder
-    layout.Padding = UDim.new(0, 6)
+    layout.Padding = UDim.new(0, 4)
     layout.Parent = Container
 
+    -- 4 Clean On/Off Features
     UI.CreateToggleSwitchRow(Container, "Desk Snapping / Sitting", "DeskSnapping")
     UI.CreateToggleSwitchRow(Container, "Teacher Position Tracking", "TeacherPositionTracking")
     UI.CreateToggleSwitchRow(Container, "Anti Detect", "AntiDetect")
+    UI.CreateToggleSwitchRow(Container, "Teacher Patrols Tracker", "TeacherPatrols")
 
     return ScreenGui
 end
@@ -311,7 +352,8 @@ function Core.Init()
     Features.InitTeacherTracking()
     Features.InitDeskSnapping()
     Features.InitAntiDetect()
-    print("[XORQEN HUB v1.6.0] All feature toggles bound and operational.")
+    Features.InitTeacherPatrols()
+    print("[XORQEN HUB v1.7.0] 4 key features active.")
 end
 
 Core.Init()
