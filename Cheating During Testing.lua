@@ -1,40 +1,39 @@
 -- ============================================================================
--- XORQEN HUB — DIRECT LUA BUILDER
+-- XORQEN HUB — DIRECT LUA BUILDER (ANDROID / MOBILE COMPACT EDITION)
 -- Target Game: Cheating During Testing [BETA] (Roblox)
--- Architecture: Single-Container Modular Script
--- Selected Features Only:
--- 1. Teacher Patrols Tracker
--- 2. Suspicion / Detection Gauge
--- 3. WalkSpeed & Dash
--- 4. Desk Snapping / Sitting
--- 5. Teacher Position Tracking
--- 6. Desk / NPC Outline
+-- UI Design: Clean Compact Single Card Panel
 -- ============================================================================
 
 local Core = {
     Config = {
-        Version = "1.2.0",
+        Version = "1.3.0-Mobile",
         Theme = {
             Background = Color3.fromRGB(13, 17, 23),
             Card = Color3.fromRGB(22, 27, 34),
             Accent = Color3.fromRGB(0, 240, 255),
-            Text = Color3.fromRGB(200, 245, 255),
-            Muted = Color3.fromRGB(100, 130, 150),
-            Warning = Color3.fromRGB(255, 170, 0),
-            Danger = Color3.fromRGB(255, 50, 50)
+            Text = Color3.fromRGB(230, 245, 255),
+            Muted = Color3.fromRGB(120, 140, 160),
+            ToggleOff = Color3.fromRGB(50, 60, 75),
+            ToggleOn = Color3.fromRGB(0, 240, 255)
         }
     },
     State = {
-        -- Movement
-        WalkSpeed = 16,
-        DashPower = 50,
-        
+        SpeedEnabled = true,
+        Speed = 16,
+        JumpPowerEnabled = true,
+        JumpPower = 50,
+        InfiniteJump = false,
+        Fly = true,
+        FlyMode = "Normal",
+        NoClip = false,
+        Sprint = false,
+        GravityEnabled = false,
+        Gravity = 196.2,
+
         -- Stealth & Tracking
         TeacherPatrols = true,
         TeacherPositionTracking = true,
         SuspicionGauge = true,
-        
-        -- World Interaction & Visuals
         DeskSnapping = true,
         DeskNPCOutline = true
     },
@@ -52,7 +51,7 @@ local Core = {
 Core.LocalPlayer = Core.Services.Players.LocalPlayer
 
 -- ============================================================================
--- MODULE: GAME ADAPTER
+-- GAME ADAPTER
 -- ============================================================================
 local GameAdapter = {}
 
@@ -86,7 +85,6 @@ function GameAdapter.FindAssignedSeat()
     if hum and hum.SeatPart then
         return hum.SeatPart
     end
-    
     for _, part in ipairs(Core.Services.Workspace:GetDescendants()) do
         if part:IsA("Seat") or part:IsA("VehicleSeat") then
             if part:FindFirstChild("AssignedPlayer") and part.AssignedPlayer.Value == Core.LocalPlayer then
@@ -100,240 +98,232 @@ function GameAdapter.FindAssignedSeat()
 end
 
 -- ============================================================================
--- MODULE 1 & 5: TEACHER PATROLS & POSITION TRACKING
+-- FEATURE LOGIC
 -- ============================================================================
-local TeacherTracker = {}
-local TeacherTracer = Drawing.new("Line")
-TeacherTracer.Thickness = 2
-TeacherTracer.Color = Core.Config.Theme.Danger
-TeacherTracer.Transparency = 0.8
+local Features = {}
 
-local TeacherMarker = Drawing.new("Text")
-TeacherMarker.Size = 16
-TeacherMarker.Center = true
-TeacherMarker.Outline = true
-TeacherMarker.Color = Core.Config.Theme.Warning
-
-function TeacherTracker.Init()
-    Core.Connections.TeacherTracking = Core.Services.RunService.RenderStepped:Connect(function()
-        if not (Core.State.TeacherPatrols or Core.State.TeacherPositionTracking) then
-            TeacherTracer.Visible = false
-            TeacherMarker.Visible = false
-            return
-        end
-
-        local teacher = GameAdapter.FindTeacher()
-        local myRoot = GameAdapter.GetRootPart()
-        local camera = Core.Services.Workspace.CurrentCamera
-
-        if teacher and myRoot and camera then
-            local tRoot = teacher.HumanoidRootPart
-            local pos, visible = camera:WorldToViewportPoint(tRoot.Position)
-            local dist = math.floor((myRoot.Position - tRoot.Position).Magnitude)
-
-            if visible then
-                -- Position Marker
-                if Core.State.TeacherPositionTracking then
-                    TeacherMarker.Visible = true
-                    TeacherMarker.Position = Vector2.new(pos.X, pos.Y - 25)
-                    TeacherMarker.Text = string.format("🚨 TEACHER [%dm]", dist)
-                else
-                    TeacherMarker.Visible = false
-                end
-
-                -- Patrol Line Tracer
-                if Core.State.TeacherPatrols then
-                    TeacherTracer.Visible = true
-                    TeacherTracer.From = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y)
-                    TeacherTracer.To = Vector2.new(pos.X, pos.Y)
-                else
-                    TeacherTracer.Visible = false
-                end
-            else
-                TeacherTracer.Visible = false
-                TeacherMarker.Visible = false
-            end
-        else
-            TeacherTracer.Visible = false
-            TeacherMarker.Visible = false
-        end
-    end)
-end
-
--- ============================================================================
--- MODULE 2: SUSPICION / DETECTION GAUGE VISUALIZER
--- ============================================================================
-local SuspicionVisualizer = {}
-
-function SuspicionVisualizer.Init()
-    local gui = Instance.new("ScreenGui")
-    gui.Name = "SuspicionGaugeUI"
-    pcall(function() gui.Parent = Core.Services.CoreGui end)
-    if not gui.Parent then gui.Parent = Core.LocalPlayer:WaitForChild("PlayerGui") end
-
-    local container = Instance.new("Frame")
-    container.Size = UDim2.new(0, 200, 0, 18)
-    container.Position = UDim2.new(0.5, -100, 0.15, 0)
-    container.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    container.BorderSizePixel = 0
-    container.Parent = gui
-
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 4)
-    corner.Parent = container
-
-    local fill = Instance.new("Frame")
-    fill.Name = "FillBar"
-    fill.Size = UDim2.new(0.05, 0, 1, 0)
-    fill.BackgroundColor3 = Core.Config.Theme.Accent
-    fill.BorderSizePixel = 0
-    fill.Parent = container
-
-    local fillCorner = Instance.new("UICorner")
-    fillCorner.CornerRadius = UDim.new(0, 4)
-    fillCorner.Parent = fill
-
-    local label = Instance.new("TextLabel")
-    label.Text = "DETECTION METER"
-    label.Font = Enum.Font.GothamBold
-    label.TextSize = 10
-    label.TextColor3 = Core.Config.Theme.Text
-    label.BackgroundTransparency = 1
-    label.Size = UDim2.new(1, 0, 1, 0)
-    label.Parent = container
-
-    Core.Connections.GaugeUpdate = Core.Services.RunService.Heartbeat:Connect(function()
-        container.Visible = Core.State.SuspicionGauge
-        if not Core.State.SuspicionGauge then return end
-
-        local teacher = GameAdapter.FindTeacher()
-        local myRoot = GameAdapter.GetRootPart()
-
-        if teacher and myRoot then
-            local tRoot = teacher.HumanoidRootPart
-            local dist = (myRoot.Position - tRoot.Position).Magnitude
-            local threatLevel = math.clamp(1 - (dist / 40), 0.05, 1)
-
-            fill.Size = UDim2.new(threatLevel, 0, 1, 0)
-            if threatLevel > 0.7 then
-                fill.BackgroundColor3 = Core.Config.Theme.Danger
-            elseif threatLevel > 0.4 then
-                fill.BackgroundColor3 = Core.Config.Theme.Warning
-            else
-                fill.BackgroundColor3 = Core.Config.Theme.Accent
-            end
-        end
-    end)
-end
-
--- ============================================================================
--- MODULE 3: WALKSPEED & DASH MECHANICS
--- ============================================================================
-local MovementEngine = {}
-
-function MovementEngine.Init()
-    -- WalkSpeed Loop
-    Core.Connections.WalkSpeedHook = Core.Services.RunService.Heartbeat:Connect(function()
+function Features.InitMovement()
+    Core.Connections.MovementLoop = Core.Services.RunService.Heartbeat:Connect(function()
         local hum = GameAdapter.GetHumanoid()
         if hum then
-            hum.WalkSpeed = Core.State.WalkSpeed
+            if Core.State.SpeedEnabled then hum.WalkSpeed = Core.State.Speed end
+            if Core.State.JumpPowerEnabled then hum.JumpPower = Core.State.JumpPower end
+        end
+        if Core.State.GravityEnabled then
+            Core.Services.Workspace.Gravity = Core.State.Gravity
         end
     end)
 
-    -- Dash Activation (Shift Key)
-    Core.Connections.DashInput = Core.Services.UserInputService.InputBegan:Connect(function(input, gpe)
-        if gpe then return end
-        if input.KeyCode == Enum.KeyCode.LeftShift then
-            local root = GameAdapter.GetRootPart()
+    Core.Connections.InfJump = Core.Services.UserInputService.JumpRequest:Connect(function()
+        if Core.State.InfiniteJump then
             local hum = GameAdapter.GetHumanoid()
-            if root and hum and hum.MoveDirection.Magnitude > 0 then
-                root.Velocity = hum.MoveDirection * Core.State.DashPower
+            if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
+        end
+    end)
+
+    Core.Connections.NoClip = Core.Services.RunService.Stepped:Connect(function()
+        if Core.State.NoClip then
+            local char = GameAdapter.GetCharacter()
+            if char then
+                for _, part in ipairs(char:GetDescendants()) do
+                    if part:IsA("BasePart") then part.CanCollide = false end
+                end
             end
         end
     end)
 end
 
 -- ============================================================================
--- MODULE 4: DESK SNAPPING / SITTING
--- ============================================================================
-local DeskSnapper = {}
-
-function DeskSnapper.Snap()
-    local seat = GameAdapter.FindAssignedSeat()
-    local root = GameAdapter.GetRootPart()
-    local hum = GameAdapter.GetHumanoid()
-
-    if seat and root and hum then
-        root.CFrame = seat.CFrame * CFrame.new(0, 2, 0)
-        task.wait(0.05)
-        seat:Sit(hum)
-    end
-end
-
-function DeskSnapper.Init()
-    Core.Connections.DeskSnapInput = Core.Services.UserInputService.InputBegan:Connect(function(input, gpe)
-        if gpe then return end
-        if input.KeyCode == Enum.KeyCode.F then
-            DeskSnapper.Snap()
-        end
-    end)
-end
-
--- ============================================================================
--- MODULE 6: DESK & NPC OUTLINE (HIGHLIGHT SYSTEM)
--- ============================================================================
-local OutlineEngine = {}
-local Highlights = {}
-
-function OutlineEngine.ApplyHighlight(object, color)
-    if not object:FindFirstChildOfClass("Highlight") then
-        local hl = Instance.new("Highlight")
-        hl.FillColor = color
-        hl.OutlineColor = Color3.fromRGB(255, 255, 255)
-        hl.FillTransparency = 0.5
-        hl.OutlineTransparency = 0.1
-        hl.Parent = object
-        table.insert(Highlights, hl)
-    end
-end
-
-function OutlineEngine.ClearHighlights()
-    for _, hl in ipairs(Highlights) do
-        hl:Destroy()
-    end
-    table.clear(Highlights)
-end
-
-function OutlineEngine.Init()
-    Core.Connections.OutlineUpdate = Core.Services.RunService.Heartbeat:Connect(function()
-        if not Core.State.DeskNPCOutline then
-            OutlineEngine.ClearHighlights()
-            return
-        end
-
-        -- Highlight Teacher NPC
-        local teacher = GameAdapter.FindTeacher()
-        if teacher then
-            OutlineEngine.ApplyHighlight(teacher, Core.Config.Theme.Danger)
-        end
-
-        -- Highlight Neighbor Student NPCs & Desks
-        for _, obj in ipairs(Core.Services.Workspace:GetDescendants()) do
-            if obj:IsA("Model") and (obj.Name:find("Student") or obj.Name:find("Desk")) then
-                OutlineEngine.ApplyHighlight(obj, Core.Config.Theme.Accent)
-            end
-        end
-    end)
-end
-
--- ============================================================================
--- XORQEN HUB UI ARCHITECTURE INTEGRATION
+-- MOBILE COMPACT UI ENGINE
 -- ============================================================================
 local UI = {}
 
-function UI.Create()
+function UI.CreateToggleRow(parent, labelText, stateKey, hasSlider, minVal, maxVal, defaultVal, sliderCallback)
+    local row = Instance.new("Frame")
+    row.Size = UDim2.new(1, 0, 0, 36)
+    row.BackgroundTransparency = 1
+    row.Parent = parent
+
+    -- Checkbox / Label
+    local checkBtn = Instance.new("TextButton")
+    checkBtn.Size = UDim2.new(0, 20, 0, 20)
+    checkBtn.Position = UDim2.new(0, 0, 0.5, -10)
+    checkBtn.BackgroundColor3 = Core.State[stateKey] and Core.Config.Theme.Accent or Color3.fromRGB(25, 32, 42)
+    checkBtn.BorderColor3 = Core.Config.Theme.Accent
+    checkBtn.Text = Core.State[stateKey] and "✓" or ""
+    checkBtn.TextColor3 = Color3.fromRGB(13, 17, 23)
+    checkBtn.Font = Enum.Font.GothamBold
+    checkBtn.TextSize = 14
+    checkBtn.Parent = row
+
+    local checkCorner = Instance.new("UICorner")
+    checkCorner.CornerRadius = UDim.new(0, 4)
+    checkCorner.Parent = checkBtn
+
+    local label = Instance.new("TextLabel")
+    label.Text = labelText
+    label.Font = Enum.Font.Gotham
+    label.TextSize = 15
+    label.TextColor3 = Core.Config.Theme.Text
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Position = UDim2.new(0, 28, 0, 0)
+    label.Size = UDim2.new(0.4, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Parent = row
+
+    checkBtn.MouseButton1Click:Connect(function()
+        Core.State[stateKey] = not Core.State[stateKey]
+        checkBtn.BackgroundColor3 = Core.State[stateKey] and Core.Config.Theme.Accent or Color3.fromRGB(25, 32, 42)
+        checkBtn.Text = Core.State[stateKey] and "✓" or ""
+    end)
+
+    -- Optional Slider
+    if hasSlider then
+        local sliderBg = Instance.new("Frame")
+        sliderBg.Size = UDim2.new(0, 110, 0, 6)
+        sliderBg.Position = UDim2.new(1, -150, 0.5, -3)
+        sliderBg.BackgroundColor3 = Color3.fromRGB(35, 45, 58)
+        sliderBg.BorderSizePixel = 0
+        sliderBg.Parent = row
+
+        local sliderCorner = Instance.new("UICorner")
+        sliderCorner.CornerRadius = UDim.new(0, 3)
+        sliderCorner.Parent = sliderBg
+
+        local valPct = (defaultVal - minVal) / (maxVal - minVal)
+
+        local sliderFill = Instance.new("Frame")
+        sliderFill.Size = UDim2.new(valPct, 0, 1, 0)
+        sliderFill.BackgroundColor3 = Core.Config.Theme.Accent
+        sliderFill.BorderSizePixel = 0
+        sliderFill.Parent = sliderBg
+
+        local fillCorner = Instance.new("UICorner")
+        fillCorner.CornerRadius = UDim.new(0, 3)
+        fillCorner.Parent = sliderFill
+
+        local knob = Instance.new("Frame")
+        knob.Size = UDim2.new(0, 16, 0, 16)
+        knob.Position = UDim2.new(1, -8, 0.5, -8)
+        knob.BackgroundColor3 = Color3.fromRGB(200, 215, 225)
+        knob.BorderSizePixel = 0
+        knob.Parent = sliderFill
+
+        local knobCorner = Instance.new("UICorner")
+        knobCorner.CornerRadius = UDim.new(1, 0)
+        knobCorner.Parent = knob
+
+        local valLabel = Instance.new("TextLabel")
+        valLabel.Text = tostring(defaultVal)
+        valLabel.Font = Enum.Font.Gotham
+        valLabel.TextSize = 15
+        valLabel.TextColor3 = Core.Config.Theme.Text
+        valLabel.Position = UDim2.new(1, -30, 0, 0)
+        valLabel.Size = UDim2.new(0, 30, 1, 0)
+        valLabel.BackgroundTransparency = 1
+        valLabel.Parent = row
+
+        -- Touch Drag logic
+        local dragging = false
+        sliderBg.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = true
+            end
+        end)
+        Core.Services.UserInputService.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = false
+            end
+        end)
+        Core.Services.UserInputService.InputChanged:Connect(function(input)
+            if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                local posX = math.clamp(input.Position.X - sliderBg.AbsolutePosition.X, 0, sliderBg.AbsoluteSize.X)
+                local pct = posX / sliderBg.AbsoluteSize.X
+                local val = math.floor(minVal + (pct * (maxVal - minVal)))
+                sliderFill.Size = UDim2.new(pct, 0, 1, 0)
+                valLabel.Text = tostring(val)
+                sliderCallback(val)
+            end
+        end)
+    end
+
+    return row
+end
+
+function UI.CreateToggleSwitchRow(parent, labelText, stateKey)
+    local row = Instance.new("Frame")
+    row.Size = UDim2.new(1, 0, 0, 36)
+    row.BackgroundTransparency = 1
+    row.Parent = parent
+
+    -- Checkbox
+    local checkBtn = Instance.new("TextButton")
+    checkBtn.Size = UDim2.new(0, 20, 0, 20)
+    checkBtn.Position = UDim2.new(0, 0, 0.5, -10)
+    checkBtn.BackgroundColor3 = Core.State[stateKey] and Core.Config.Theme.Accent or Color3.fromRGB(25, 32, 42)
+    checkBtn.BorderColor3 = Core.Config.Theme.Accent
+    checkBtn.Text = Core.State[stateKey] and "✓" or ""
+    checkBtn.TextColor3 = Color3.fromRGB(13, 17, 23)
+    checkBtn.Font = Enum.Font.GothamBold
+    checkBtn.TextSize = 14
+    checkBtn.Parent = row
+
+    local checkCorner = Instance.new("UICorner")
+    checkCorner.CornerRadius = UDim.new(0, 4)
+    checkCorner.Parent = checkBtn
+
+    local label = Instance.new("TextLabel")
+    label.Text = labelText
+    label.Font = Enum.Font.Gotham
+    label.TextSize = 15
+    label.TextColor3 = Core.Config.Theme.Text
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Position = UDim2.new(0, 28, 0, 0)
+    label.Size = UDim2.new(0.5, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Parent = row
+
+    -- Switch
+    local switchBg = Instance.new("TextButton")
+    switchBg.Text = ""
+    switchBg.Size = UDim2.new(0, 44, 0, 22)
+    switchBg.Position = UDim2.new(1, -44, 0.5, -11)
+    switchBg.BackgroundColor3 = Core.State[stateKey] and Core.Config.Theme.ToggleOn or Core.Config.Theme.ToggleOff
+    switchBg.BorderSizePixel = 0
+    switchBg.Parent = row
+
+    local switchCorner = Instance.new("UICorner")
+    switchCorner.CornerRadius = UDim.new(1, 0)
+    switchCorner.Parent = switchBg
+
+    local knob = Instance.new("Frame")
+    knob.Size = UDim2.new(0, 18, 0, 18)
+    knob.Position = Core.State[stateKey] and UDim2.new(1, -20, 0.5, -9) or UDim2.new(0, 2, 0.5, -9)
+    knob.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
+    knob.BorderSizePixel = 0
+    knob.Parent = switchBg
+
+    local knobCorner = Instance.new("UICorner")
+    knobCorner.CornerRadius = UDim.new(1, 0)
+    knobCorner.Parent = knob
+
+    local function toggle()
+        Core.State[stateKey] = not Core.State[stateKey]
+        checkBtn.BackgroundColor3 = Core.State[stateKey] and Core.Config.Theme.Accent or Color3.fromRGB(25, 32, 42)
+        checkBtn.Text = Core.State[stateKey] and "✓" or ""
+        switchBg.BackgroundColor3 = Core.State[stateKey] and Core.Config.Theme.ToggleOn or Core.Config.Theme.ToggleOff
+        knob.Position = Core.State[stateKey] and UDim2.new(1, -20, 0.5, -9) or UDim2.new(0, 2, 0.5, -9)
+    end
+
+    checkBtn.MouseButton1Click:Connect(toggle)
+    switchBg.MouseButton1Click:Connect(toggle)
+
+    return row
+end
+
+function UI.BuildMobileUI()
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "XorqenHubUI"
+    ScreenGui.Name = "XorqenHubMobileUI"
     ScreenGui.ResetOnSpawn = false
 
     pcall(function() ScreenGui.Parent = Core.Services.CoreGui end)
@@ -341,11 +331,12 @@ function UI.Create()
 
     local Main = Instance.new("Frame")
     Main.Name = "MainWindow"
-    Main.Size = UDim2.new(0, 920, 0, 520)
-    Main.Position = UDim2.new(0.5, -460, 0.5, -260)
+    Main.Size = UDim2.new(0, 320, 0, 330)
+    Main.Position = UDim2.new(0.5, -160, 0.5, -165)
     Main.BackgroundColor3 = Core.Config.Theme.Background
     Main.BorderSizePixel = 0
-    Main.ClipsDescendants = true
+    Main.Active = true
+    Main.Draggable = true -- Full mobile touch-drag support
     Main.Parent = ScreenGui
 
     local Corner = Instance.new("UICorner")
@@ -353,39 +344,98 @@ function UI.Create()
     Corner.Parent = Main
 
     local Stroke = Instance.new("UIStroke")
-    Stroke.Color = Core.Config.Theme.Accent
-    Stroke.Thickness = 1.2
-    Stroke.Transparency = 0.6
+    Stroke.Color = Color3.fromRGB(35, 45, 55)
+    Stroke.Thickness = 1
     Stroke.Parent = Main
 
-    local Sidebar = Instance.new("Frame")
-    Sidebar.Name = "Sidebar"
-    Sidebar.Size = UDim2.new(0, 160, 1, 0)
-    Sidebar.BackgroundColor3 = Core.Config.Theme.Card
-    Sidebar.BorderSizePixel = 0
-    Sidebar.Parent = Main
+    -- Header
+    local Header = Instance.new("TextLabel")
+    Header.Text = "XORQEN HUB"
+    Header.Font = Enum.Font.GothamBold
+    Header.TextSize = 18
+    Header.TextColor3 = Core.Config.Theme.Text
+    Header.TextXAlignment = Enum.TextXAlignment.Left
+    Header.Position = UDim2.new(0, 14, 0, 12)
+    Header.Size = UDim2.new(1, -28, 0, 24)
+    Header.BackgroundTransparency = 1
+    Header.Parent = Main
 
-    local Logo = Instance.new("TextLabel")
-    Logo.Text = "XORQEN HUB"
-    Logo.Font = Enum.Font.GothamBold
-    Logo.TextSize = 18
-    Logo.TextColor3 = Core.Config.Theme.Accent
-    Logo.Position = UDim2.new(0, 15, 0, 20)
-    Logo.Size = UDim2.new(1, -30, 0, 25)
-    Logo.TextXAlignment = Enum.TextXAlignment.Left
-    Logo.BackgroundTransparency = 1
-    Logo.Parent = Sidebar
+    -- Container List
+    local Container = Instance.new("Frame")
+    Container.Size = UDim2.new(1, -28, 1, -48)
+    Container.Position = UDim2.new(0, 14, 0, 42)
+    Container.BackgroundTransparency = 1
+    Container.Parent = Main
 
-    local StatusLabel = Instance.new("TextLabel")
-    StatusLabel.Text = "Game: Cheating During Testing\nStatus: Connected\nVersion: " .. Core.Config.Version
-    StatusLabel.Font = Enum.Font.Gotham
-    StatusLabel.TextSize = 10
-    StatusLabel.TextColor3 = Core.Config.Theme.Muted
-    StatusLabel.Position = UDim2.new(0, 15, 0, 50)
-    StatusLabel.Size = UDim2.new(1, -30, 0, 45)
-    StatusLabel.TextXAlignment = Enum.TextXAlignment.Left
-    StatusLabel.BackgroundTransparency = 1
-    StatusLabel.Parent = Sidebar
+    local layout = Instance.new("UIListLayout")
+    layout.SortOrder = Enum.SortOrder.LayoutOrder
+    layout.Padding = UDim.new(0, 4)
+    layout.Parent = Container
+
+    -- Controls from Screenshot
+    UI.CreateToggleRow(Container, "Speed", "SpeedEnabled", true, 16, 100, 16, function(v) Core.State.Speed = v end)
+    UI.CreateToggleRow(Container, "Jump Power", "JumpPowerEnabled", true, 50, 200, 50, function(v) Core.State.JumpPower = v end)
+    UI.CreateToggleSwitchRow(Container, "Infinite Jump", "InfiniteJump")
+    
+    -- Fly Row with Dropdown
+    local flyRow = Instance.new("Frame")
+    flyRow.Size = UDim2.new(1, 0, 0, 36)
+    flyRow.BackgroundTransparency = 1
+    flyRow.Parent = Container
+
+    local checkBtn = Instance.new("TextButton")
+    checkBtn.Size = UDim2.new(0, 20, 0, 20)
+    checkBtn.Position = UDim2.new(0, 0, 0.5, -10)
+    checkBtn.BackgroundColor3 = Core.Config.Theme.Accent
+    checkBtn.Text = "✓"
+    checkBtn.TextColor3 = Color3.fromRGB(13, 17, 23)
+    checkBtn.Font = Enum.Font.GothamBold
+    checkBtn.TextSize = 14
+    checkBtn.Parent = flyRow
+
+    local checkCorner = Instance.new("UICorner")
+    checkCorner.CornerRadius = UDim.new(0, 4)
+    checkCorner.Parent = checkBtn
+
+    local label = Instance.new("TextLabel")
+    label.Text = "Fly"
+    label.Font = Enum.Font.Gotham
+    label.TextSize = 15
+    label.TextColor3 = Core.Config.Theme.Text
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Position = UDim2.new(0, 28, 0, 0)
+    label.Size = UDim2.new(0.3, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Parent = flyRow
+
+    local modeLabel = Instance.new("TextLabel")
+    modeLabel.Text = "Mode"
+    modeLabel.Font = Enum.Font.Gotham
+    modeLabel.TextSize = 15
+    modeLabel.TextColor3 = Core.Config.Theme.Muted
+    modeLabel.Position = UDim2.new(0.5, -15, 0, 0)
+    modeLabel.Size = UDim2.new(0, 45, 1, 0)
+    modeLabel.BackgroundTransparency = 1
+    modeLabel.Parent = flyRow
+
+    local dropdown = Instance.new("TextButton")
+    dropdown.Text = "Normal ▼"
+    dropdown.Font = Enum.Font.Gotham
+    dropdown.TextSize = 13
+    dropdown.TextColor3 = Core.Config.Theme.Text
+    dropdown.Size = UDim2.new(0, 95, 0, 26)
+    dropdown.Position = UDim2.new(1, -95, 0.5, -13)
+    dropdown.BackgroundColor3 = Color3.fromRGB(22, 28, 36)
+    dropdown.BorderColor3 = Color3.fromRGB(45, 55, 70)
+    dropdown.Parent = flyRow
+
+    local dropCorner = Instance.new("UICorner")
+    dropCorner.CornerRadius = UDim.new(0, 5)
+    dropCorner.Parent = dropdown
+
+    UI.CreateToggleSwitchRow(Container, "No Clip", "NoClip")
+    UI.CreateToggleSwitchRow(Container, "Sprint", "Sprint")
+    UI.CreateToggleRow(Container, "Gravity", "GravityEnabled", true, 0, 196, 196, function(v) Core.State.Gravity = v end)
 
     return ScreenGui
 end
@@ -394,13 +444,9 @@ end
 -- INITIALIZATION
 -- ============================================================================
 function Core.Init()
-    UI.Create()
-    TeacherTracker.Init()
-    SuspicionVisualizer.Init()
-    MovementEngine.Init()
-    DeskSnapper.Init()
-    OutlineEngine.Init()
-    print("[XORQEN HUB v1.2.0] Selected 6 features successfully initialized.")
+    UI.BuildMobileUI()
+    Features.InitMovement()
+    print("[XORQEN HUB Mobile v1.3.0] Single card interface loaded.")
 end
 
 Core.Init()
