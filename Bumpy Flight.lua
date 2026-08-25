@@ -1,13 +1,13 @@
 -- ============================================================================
--- XORQEN HUB — BUMPY FLIGHT (ROBLOX) [COMPACT UI BUILD]
--- Version: 1.0.2 (Reduced Dimensions & Dark Slate Blue Background)
+-- XORQEN HUB — BUMPY FLIGHT (ROBLOX) [STANDALONE DISTANCE ESP BUILD]
+-- Version: 1.0.3 (Standalone Distance Indicators Patch)
 -- ============================================================================
 
 local Core = {
     Config = {
-        Version = "1.0.2-CompactUI",
+        Version = "1.0.3-Fixed",
         Theme = {
-            Background = Color3.fromRGB(20, 26, 38), -- Dark Slate Navy Blue (Not Black)
+            Background = Color3.fromRGB(20, 26, 38),
             Card = Color3.fromRGB(30, 38, 54),
             Accent = Color3.fromRGB(0, 240, 255),
             Text = Color3.fromRGB(240, 245, 255),
@@ -42,9 +42,6 @@ local Core = {
 
 Core.LocalPlayer = Core.Services.Players.LocalPlayer
 
--- ============================================================================
--- GAME ADAPTER & HELPERS
--- ============================================================================
 local Adapter = {}
 
 function Adapter.GetCharacter(player)
@@ -110,12 +107,9 @@ function Adapter.RemoveBillboard(id)
     end
 end
 
--- ============================================================================
--- FEATURE MODULES IMPLEMENTATION
--- ============================================================================
 local Features = {}
 
--- 1, 2 & 3. Passenger ESP, Flight Crew ESP & Distance Indicators
+-- Player & Distance ESP Engine (Now renders standalone when Distance Indicators is ON)
 function Features.InitPlayerESP()
     Core.Connections.PlayerESP = Core.Services.RunService.RenderStepped:Connect(function()
         local myRoot = Adapter.GetRootPart()
@@ -128,9 +122,12 @@ function Features.InitPlayerESP()
                 local id = "PLR_" .. plr.UserId
 
                 local isCrew = Adapter.IsCrew(plr)
-                local activeSwitch = isCrew and Core.State.CrewESP or Core.State.PassengerESP
+                local isPassenger = not isCrew
 
-                if activeSwitch and char and root then
+                -- Show ESP if main toggle is active OR if Distance Indicators is active standalone
+                local shouldShow = (isCrew and Core.State.CrewESP) or (isPassenger and Core.State.PassengerESP) or Core.State.DistanceIndicators
+
+                if shouldShow and char and root then
                     local color = isCrew and Core.Config.Theme.Crew or Core.Config.Theme.Passenger
                     local bill = Adapter.CreateOrGetBillboard(id, root, color)
                     bill.Enabled = true
@@ -140,14 +137,19 @@ function Features.InitPlayerESP()
                     local roleStr = isCrew and "CREW" or "PASSENGER"
                     local distStr = ""
 
-                    if Core.State.DistanceIndicators and myRoot then
+                    if myRoot then
                         local dist = math.floor((myRoot.Position - root.Position).Magnitude)
                         distStr = string.format(" [%dm]", dist)
                     end
 
                     local lbl = bill:FindFirstChild("Title")
                     if lbl then
-                        lbl.Text = string.format("%s: %s %s%s", roleStr, plr.DisplayName, statusStr, distStr)
+                        if (isCrew and Core.State.CrewESP) or (isPassenger and Core.State.PassengerESP) then
+                            lbl.Text = string.format("%s: %s %s%s", roleStr, plr.DisplayName, statusStr, distStr)
+                        else
+                            -- Standalone distance mode text
+                            lbl.Text = string.format("%s%s", plr.DisplayName, distStr)
+                        end
                     end
                 else
                     Adapter.RemoveBillboard(id)
@@ -157,7 +159,6 @@ function Features.InitPlayerESP()
     end)
 end
 
--- 4. Task & Object ESP
 function Features.InitTaskESP()
     Core.Connections.TaskESP = Core.Services.RunService.RenderStepped:Connect(function()
         if not Core.State.TaskESP then
@@ -197,7 +198,6 @@ function Features.InitTaskESP()
     end)
 end
 
--- 5. Fuel & System ESP
 function Features.InitSystemESP()
     Core.Connections.SystemESP = Core.Services.RunService.RenderStepped:Connect(function()
         if not Core.State.SystemESP then
@@ -238,7 +238,6 @@ function Features.InitSystemESP()
     end)
 end
 
--- 6. Auto-Equip Emergency Items
 function Features.InitAutoEquipEmergency()
     local emergencyKeywords = { "mask", "oxygen", "extinguisher", "fire", "gear", "life", "vest", "parachute", "flashlight" }
 
@@ -278,9 +277,6 @@ function Features.InitAutoEquipEmergency()
     end
 end
 
--- ============================================================================
--- XORQEN HUB COMPACT UI ENGINE
--- ============================================================================
 local UI = {}
 
 function UI.CreateToggleSwitchRow(parent, labelText, stateKey)
@@ -391,16 +387,13 @@ function UI.BuildMobileUI()
     return ScreenGui
 end
 
--- ============================================================================
--- INITIALIZATION
--- ============================================================================
 function Core.Init()
     UI.BuildMobileUI()
     Features.InitPlayerESP()
     Features.InitTaskESP()
     Features.InitSystemESP()
     Features.InitAutoEquipEmergency()
-    print("[XORQEN HUB v1.0.2] Loaded with compact slate blue UI.")
+    print("[XORQEN HUB v1.0.3] Standalone Distance Indicators Enabled.")
 end
 
 Core.Init()
