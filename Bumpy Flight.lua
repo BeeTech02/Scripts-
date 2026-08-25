@@ -1,11 +1,11 @@
 -- ============================================================================
--- XORQEN HUB — BUMPY FLIGHT (ROBLOX) [STANDALONE DISTANCE ESP BUILD]
--- Version: 1.0.3 (Standalone Distance Indicators Patch)
+-- XORQEN HUB — BUMPY FLIGHT (ROBLOX) [CLOSE BUTTON BUILD]
+-- Version: 1.0.4 (Close Button Added & Cleanup Handled)
 -- ============================================================================
 
 local Core = {
     Config = {
-        Version = "1.0.3-Fixed",
+        Version = "1.0.4-CloseBtn",
         Theme = {
             Background = Color3.fromRGB(20, 26, 38),
             Card = Color3.fromRGB(30, 38, 54),
@@ -14,6 +14,7 @@ local Core = {
             Muted = Color3.fromRGB(120, 140, 160),
             ToggleOff = Color3.fromRGB(45, 55, 72),
             ToggleOn = Color3.fromRGB(0, 240, 255),
+            CloseRed = Color3.fromRGB(255, 75, 75),
             Passenger = Color3.fromRGB(0, 255, 150),
             Crew = Color3.fromRGB(255, 200, 0),
             TaskObj = Color3.fromRGB(0, 180, 255),
@@ -107,9 +108,20 @@ function Adapter.RemoveBillboard(id)
     end
 end
 
+function Core.DestroyHub()
+    for _, conn in pairs(Core.Connections) do
+        if conn then conn:Disconnect() end
+    end
+    for id, _ in pairs(Core.Cache.Billboards) do
+        Adapter.RemoveBillboard(id)
+    end
+    if Core.ScreenGui then
+        Core.ScreenGui:Destroy()
+    end
+end
+
 local Features = {}
 
--- Player & Distance ESP Engine (Now renders standalone when Distance Indicators is ON)
 function Features.InitPlayerESP()
     Core.Connections.PlayerESP = Core.Services.RunService.RenderStepped:Connect(function()
         local myRoot = Adapter.GetRootPart()
@@ -124,7 +136,6 @@ function Features.InitPlayerESP()
                 local isCrew = Adapter.IsCrew(plr)
                 local isPassenger = not isCrew
 
-                -- Show ESP if main toggle is active OR if Distance Indicators is active standalone
                 local shouldShow = (isCrew and Core.State.CrewESP) or (isPassenger and Core.State.PassengerESP) or Core.State.DistanceIndicators
 
                 if shouldShow and char and root then
@@ -147,7 +158,6 @@ function Features.InitPlayerESP()
                         if (isCrew and Core.State.CrewESP) or (isPassenger and Core.State.PassengerESP) then
                             lbl.Text = string.format("%s: %s %s%s", roleStr, plr.DisplayName, statusStr, distStr)
                         else
-                            -- Standalone distance mode text
                             lbl.Text = string.format("%s%s", plr.DisplayName, distStr)
                         end
                     end
@@ -335,6 +345,7 @@ function UI.BuildMobileUI()
 
     pcall(function() ScreenGui.Parent = Core.Services.CoreGui end)
     if not ScreenGui.Parent then ScreenGui.Parent = Core.LocalPlayer:WaitForChild("PlayerGui") end
+    Core.ScreenGui = ScreenGui
 
     local Main = Instance.new("Frame")
     Main.Name = "MainWindow"
@@ -355,6 +366,7 @@ function UI.BuildMobileUI()
     Stroke.Thickness = 1
     Stroke.Parent = Main
 
+    -- Header Title
     local Header = Instance.new("TextLabel")
     Header.Text = "XORQEN HUB"
     Header.Font = Enum.Font.GothamBold
@@ -362,9 +374,38 @@ function UI.BuildMobileUI()
     Header.TextColor3 = Core.Config.Theme.Accent
     Header.TextXAlignment = Enum.TextXAlignment.Left
     Header.Position = UDim2.new(0, 10, 0, 8)
-    Header.Size = UDim2.new(1, -20, 0, 16)
+    Header.Size = UDim2.new(1, -40, 0, 16)
     Header.BackgroundTransparency = 1
     Header.Parent = Main
+
+    -- Close (X) Button
+    local CloseBtn = Instance.new("TextButton")
+    CloseBtn.Name = "CloseButton"
+    CloseBtn.Text = "✕"
+    CloseBtn.Font = Enum.Font.GothamBold
+    CloseBtn.TextSize = 13
+    CloseBtn.TextColor3 = Color3.fromRGB(180, 190, 205)
+    CloseBtn.BackgroundColor3 = Color3.fromRGB(30, 38, 54)
+    CloseBtn.Size = UDim2.new(0, 20, 0, 20)
+    CloseBtn.Position = UDim2.new(1, -26, 0, 6)
+    CloseBtn.BorderSizePixel = 0
+    CloseBtn.Parent = Main
+
+    local CloseCorner = Instance.new("UICorner")
+    CloseCorner.CornerRadius = UDim.new(0, 4)
+    CloseCorner.Parent = CloseBtn
+
+    CloseBtn.MouseEnter:Connect(function()
+        CloseBtn.TextColor3 = Core.Config.Theme.CloseRed
+    end)
+
+    CloseBtn.MouseLeave:Connect(function()
+        CloseBtn.TextColor3 = Color3.fromRGB(180, 190, 205)
+    end)
+
+    CloseBtn.MouseButton1Click:Connect(function()
+        Core.DestroyHub()
+    end)
 
     local Container = Instance.new("Frame")
     Container.Size = UDim2.new(1, -20, 1, -32)
@@ -393,7 +434,7 @@ function Core.Init()
     Features.InitTaskESP()
     Features.InitSystemESP()
     Features.InitAutoEquipEmergency()
-    print("[XORQEN HUB v1.0.3] Standalone Distance Indicators Enabled.")
+    print("[XORQEN HUB v1.0.4] Loaded with Close Button.")
 end
 
 Core.Init()
