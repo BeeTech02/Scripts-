@@ -1,12 +1,13 @@
 -- ============================================================================
 -- XORQEN HUB — DIRECT LUA BUILDER (4 FEATURE COMPACT ENGINE)
 -- Target Game: Cheating During Testing [BETA] (Roblox)
--- Architecture: Mobile Compact UI with 4 Simple On/Off Switches
+-- Architecture: Mobile Compact UI with 4 Switches + Red Close / Minimize System
+-- Version: 1.7.1-Mobile
 -- ============================================================================
 
 local Core = {
     Config = {
-        Version = "1.7.0-Mobile",
+        Version = "1.7.1-Mobile",
         Theme = {
             Background = Color3.fromRGB(13, 17, 23),
             Card = Color3.fromRGB(22, 27, 34),
@@ -15,6 +16,8 @@ local Core = {
             Muted = Color3.fromRGB(120, 140, 160),
             ToggleOff = Color3.fromRGB(50, 60, 75),
             ToggleOn = Color3.fromRGB(0, 240, 255),
+            CloseRed = Color3.fromRGB(220, 50, 50),
+            CloseRedHover = Color3.fromRGB(255, 70, 70),
             Warning = Color3.fromRGB(255, 170, 0),
             Danger = Color3.fromRGB(255, 50, 50)
         }
@@ -228,7 +231,7 @@ function Features.InitTeacherPatrols()
 end
 
 -- ============================================================================
--- MOBILE UI ENGINE (4 SWITCHES LAYOUT)
+-- MOBILE UI ENGINE (WITH RED CLOSE & MINIMIZE CONTROLS)
 -- ============================================================================
 local UI = {}
 
@@ -294,6 +297,7 @@ function UI.BuildMobileUI()
     pcall(function() ScreenGui.Parent = Core.Services.CoreGui end)
     if not ScreenGui.Parent then ScreenGui.Parent = Core.LocalPlayer:WaitForChild("PlayerGui") end
 
+    -- Main Window Panel
     local Main = Instance.new("Frame")
     Main.Name = "MainWindow"
     Main.Size = UDim2.new(0, 310, 0, 250)
@@ -313,20 +317,83 @@ function UI.BuildMobileUI()
     Stroke.Thickness = 1
     Stroke.Parent = Main
 
+    -- Header Title
     local Header = Instance.new("TextLabel")
     Header.Text = "XORQEN HUB"
     Header.Font = Enum.Font.GothamBold
     Header.TextSize = 16
-    Header.TextColor3 = Core.Config.Theme.Text
+    Header.TextColor3 = Core.Config.Theme.Accent
     Header.TextXAlignment = Enum.TextXAlignment.Left
     Header.Position = UDim2.new(0, 14, 0, 10)
-    Header.Size = UDim2.new(1, -28, 0, 20)
+    Header.Size = UDim2.new(1, -55, 0, 20)
     Header.BackgroundTransparency = 1
     Header.Parent = Main
 
+    -- Floating Open/Re-open Button (Appears when minimized)
+    local OpenBtn = Instance.new("TextButton")
+    OpenBtn.Name = "OpenButton"
+    OpenBtn.Text = "XORQEN"
+    OpenBtn.Font = Enum.Font.GothamBold
+    OpenBtn.TextSize = 12
+    OpenBtn.TextColor3 = Core.Config.Theme.Accent
+    OpenBtn.BackgroundColor3 = Core.Config.Theme.Background
+    OpenBtn.Size = UDim2.new(0, 80, 0, 32)
+    OpenBtn.Position = UDim2.new(0.02, 0, 0.45, 0)
+    OpenBtn.BorderSizePixel = 0
+    OpenBtn.Visible = false
+    OpenBtn.Active = true
+    OpenBtn.Draggable = true
+    OpenBtn.Parent = ScreenGui
+
+    local OpenCorner = Instance.new("UICorner")
+    OpenCorner.CornerRadius = UDim.new(0, 6)
+    OpenCorner.Parent = OpenBtn
+
+    local OpenStroke = Instance.new("UIStroke")
+    OpenStroke.Color = Core.Config.Theme.Accent
+    OpenStroke.Thickness = 1
+    OpenStroke.Parent = OpenBtn
+
+    -- Red Close/Minimize (X) Button
+    local CloseBtn = Instance.new("TextButton")
+    CloseBtn.Name = "CloseButton"
+    CloseBtn.Text = "X"
+    CloseBtn.Font = Enum.Font.GothamBold
+    CloseBtn.TextSize = 13
+    CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CloseBtn.BackgroundColor3 = Core.Config.Theme.CloseRed
+    CloseBtn.Size = UDim2.new(0, 24, 0, 24)
+    CloseBtn.Position = UDim2.new(1, -34, 0, 8)
+    CloseBtn.BorderSizePixel = 0
+    CloseBtn.Parent = Main
+
+    local CloseCorner = Instance.new("UICorner")
+    CloseCorner.CornerRadius = UDim.new(0, 6)
+    CloseCorner.Parent = CloseBtn
+
+    CloseBtn.MouseEnter:Connect(function()
+        CloseBtn.BackgroundColor3 = Core.Config.Theme.CloseRedHover
+    end)
+
+    CloseBtn.MouseLeave:Connect(function()
+        CloseBtn.BackgroundColor3 = Core.Config.Theme.CloseRed
+    end)
+
+    -- Click Close (X) to Minimize UI
+    CloseBtn.MouseButton1Click:Connect(function()
+        Main.Visible = false
+        OpenBtn.Visible = true
+    end)
+
+    -- Click Floating Button to Re-open UI
+    OpenBtn.MouseButton1Click:Connect(function()
+        Main.Visible = true
+        OpenBtn.Visible = false
+    end)
+
     local Container = Instance.new("Frame")
     Container.Size = UDim2.new(1, -28, 1, -40)
-    Container.Position = UDim2.new(0, 14, 0, 34)
+    Container.Position = UDim2.new(0, 14, 0, 38)
     Container.BackgroundTransparency = 1
     Container.Parent = Main
 
@@ -353,7 +420,7 @@ function Core.Init()
     Features.InitDeskSnapping()
     Features.InitAntiDetect()
     Features.InitTeacherPatrols()
-    print("[XORQEN HUB v1.7.0] 4 key features active.")
+    print("[XORQEN HUB v1.7.1] 4 key features & Red Close System loaded.")
 end
 
 Core.Init()
