@@ -1,25 +1,18 @@
 -- ============================================================================
--- XORQEN HUB — BUMPY FLIGHT (ROBLOX)
--- Version: 1.0.0 (Custom UI Styling & Target Game Binding)
--- Active Features (6 Total):
---   1. Passenger ESP
---   2. Flight Crew ESP
---   3. Distance Indicators
---   4. Task & Object ESP
---   5. Fuel & System ESP
---   6. Auto-Equip Emergency Items
+-- XORQEN HUB — BUMPY FLIGHT (ROBLOX) [COMPACT UI BUILD]
+-- Version: 1.0.2 (Reduced Dimensions & Dark Slate Blue Background)
 -- ============================================================================
 
 local Core = {
     Config = {
-        Version = "1.0.0-BumpyFlight",
+        Version = "1.0.2-CompactUI",
         Theme = {
-            Background = Color3.fromRGB(13, 17, 23),
-            Card = Color3.fromRGB(22, 27, 34),
+            Background = Color3.fromRGB(20, 26, 38), -- Dark Slate Navy Blue (Not Black)
+            Card = Color3.fromRGB(30, 38, 54),
             Accent = Color3.fromRGB(0, 240, 255),
-            Text = Color3.fromRGB(230, 245, 255),
+            Text = Color3.fromRGB(240, 245, 255),
             Muted = Color3.fromRGB(120, 140, 160),
-            ToggleOff = Color3.fromRGB(50, 60, 75),
+            ToggleOff = Color3.fromRGB(45, 55, 72),
             ToggleOn = Color3.fromRGB(0, 240, 255),
             Passenger = Color3.fromRGB(0, 255, 150),
             Crew = Color3.fromRGB(255, 200, 0),
@@ -61,7 +54,8 @@ end
 
 function Adapter.GetRootPart(player)
     local char = Adapter.GetCharacter(player)
-    return char and char:FindFirstChild("HumanoidRootPart")
+    if not char then return nil end
+    return char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("Head") or char.PrimaryPart
 end
 
 function Adapter.GetHumanoid(player)
@@ -99,7 +93,7 @@ function Adapter.CreateOrGetBillboard(id, targetPart, color)
     label.Size = UDim2.new(1, 0, 1, 0)
     label.BackgroundTransparency = 1
     label.Font = Enum.Font.GothamBold
-    label.TextSize = 13
+    label.TextSize = 12
     label.TextColor3 = color
     label.TextStrokeTransparency = 0.2
     label.Parent = bill
@@ -117,7 +111,7 @@ function Adapter.RemoveBillboard(id)
 end
 
 -- ============================================================================
--- FEATURE IMPLEMENTATION
+-- FEATURE MODULES IMPLEMENTATION
 -- ============================================================================
 local Features = {}
 
@@ -136,12 +130,13 @@ function Features.InitPlayerESP()
                 local isCrew = Adapter.IsCrew(plr)
                 local activeSwitch = isCrew and Core.State.CrewESP or Core.State.PassengerESP
 
-                if activeSwitch and char and root and hum then
+                if activeSwitch and char and root then
                     local color = isCrew and Core.Config.Theme.Crew or Core.Config.Theme.Passenger
                     local bill = Adapter.CreateOrGetBillboard(id, root, color)
                     bill.Enabled = true
 
-                    local statusStr = hum.SeatPart and "[SEATED]" or "[UNBUCKLED]"
+                    local isSeated = (hum and hum.SeatPart) or false
+                    local statusStr = isSeated and "[SEATED]" or "[UNBUCKLED]"
                     local roleStr = isCrew and "CREW" or "PASSENGER"
                     local distStr = ""
 
@@ -178,7 +173,7 @@ function Features.InitTaskESP()
         for _, obj in ipairs(Core.Services.Workspace:GetDescendants()) do
             local name = obj.Name:lower()
             if obj:IsA("BasePart") or obj:IsA("Model") then
-                if name:find("mask") or name:find("extinguisher") or name:find("seatbelt") or name:find("door") or name:find("valve") or name:find("repair") then
+                if name:find("mask") or name:find("extinguisher") or name:find("seatbelt") or name:find("door") or name:find("valve") or name:find("repair") or name:find("oxygen") then
                     local targetPart = obj:IsA("Model") and (obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")) or obj
                     if targetPart then
                         local id = "TASK_" .. obj:GetDebugId()
@@ -245,63 +240,70 @@ end
 
 -- 6. Auto-Equip Emergency Items
 function Features.InitAutoEquipEmergency()
-    Core.Connections.AutoEquip = Core.Services.RunService.Heartbeat:Connect(function()
+    local emergencyKeywords = { "mask", "oxygen", "extinguisher", "fire", "gear", "life", "vest", "parachute", "flashlight" }
+
+    local function checkAndEquipTool(tool)
         if not Core.State.AutoEquipEmergency then return end
+        if not tool or not tool:IsA("Tool") then return end
 
-        local char = Adapter.GetCharacter()
-        local hum = Adapter.GetHumanoid()
-        local backpack = Core.LocalPlayer:FindFirstChildOfClass("Backpack")
-        if not char or not hum or not backpack then return end
-
-        -- Depressurization/Oxygen check
-        local isDepressurized = Core.Services.Workspace:FindFirstChild("Depressurization") or Core.Services.Workspace:GetAttribute("Depressurized")
-        if isDepressurized then
-            local mask = backpack:FindFirstChild("Oxygen Mask") or backpack:FindFirstChild("Mask")
-            if mask then hum:EquipTool(mask) end
-        end
-
-        -- Fire emergency check
-        local fireNearby = false
-        for _, obj in ipairs(Core.Services.Workspace:GetDescendants()) do
-            if obj:IsA("Fire") or obj.Name:lower():find("fire") then
-                fireNearby = true
+        local toolName = tool.Name:lower()
+        for _, kw in ipairs(emergencyKeywords) do
+            if toolName:find(kw) then
+                local hum = Adapter.GetHumanoid()
+                if hum then
+                    hum:EquipTool(tool)
+                end
                 break
             end
         end
+    end
 
-        if fireNearby then
-            local ext = backpack:FindFirstChild("Fire Extinguisher") or backpack:FindFirstChild("Extinguisher")
-            if ext then hum:EquipTool(ext) end
+    Core.Connections.AutoEquip = Core.Services.RunService.Heartbeat:Connect(function()
+        if not Core.State.AutoEquipEmergency then return end
+
+        local backpack = Core.LocalPlayer:FindFirstChildOfClass("Backpack")
+        if backpack then
+            for _, item in ipairs(backpack:GetChildren()) do
+                checkAndEquipTool(item)
+            end
         end
     end)
+
+    local backpack = Core.LocalPlayer:FindFirstChildOfClass("Backpack") or Core.LocalPlayer:WaitForChild("Backpack", 5)
+    if backpack then
+        backpack.ChildAdded:Connect(function(child)
+            task.wait(0.1)
+            checkAndEquipTool(child)
+        end)
+    end
 end
 
 -- ============================================================================
--- XORQEN HUB MOBILE UI ENGINE
+-- XORQEN HUB COMPACT UI ENGINE
 -- ============================================================================
 local UI = {}
 
 function UI.CreateToggleSwitchRow(parent, labelText, stateKey)
     local row = Instance.new("Frame")
-    row.Size = UDim2.new(1, 0, 0, 40)
+    row.Size = UDim2.new(1, 0, 0, 28)
     row.BackgroundTransparency = 1
     row.Parent = parent
 
     local label = Instance.new("TextLabel")
     label.Text = labelText
     label.Font = Enum.Font.GothamBold
-    label.TextSize = 13
+    label.TextSize = 11
     label.TextColor3 = Core.Config.Theme.Text
     label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Position = UDim2.new(0, 8, 0, 0)
-    label.Size = UDim2.new(0.65, 0, 1, 0)
+    label.Position = UDim2.new(0, 4, 0, 0)
+    label.Size = UDim2.new(0.68, 0, 1, 0)
     label.BackgroundTransparency = 1
     label.Parent = row
 
     local switchBg = Instance.new("TextButton")
     switchBg.Text = ""
-    switchBg.Size = UDim2.new(0, 50, 0, 24)
-    switchBg.Position = UDim2.new(1, -50, 0.5, -12)
+    switchBg.Size = UDim2.new(0, 38, 0, 18)
+    switchBg.Position = UDim2.new(1, -38, 0.5, -9)
     switchBg.BackgroundColor3 = Core.State[stateKey] and Core.Config.Theme.ToggleOn or Core.Config.Theme.ToggleOff
     switchBg.BorderSizePixel = 0
     switchBg.Parent = row
@@ -311,9 +313,9 @@ function UI.CreateToggleSwitchRow(parent, labelText, stateKey)
     switchCorner.Parent = switchBg
 
     local knob = Instance.new("Frame")
-    knob.Size = UDim2.new(0, 20, 0, 20)
-    knob.Position = Core.State[stateKey] and UDim2.new(1, -22, 0.5, -10) or UDim2.new(0, 2, 0.5, -10)
-    knob.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
+    knob.Size = UDim2.new(0, 14, 0, 14)
+    knob.Position = Core.State[stateKey] and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7)
+    knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     knob.BorderSizePixel = 0
     knob.Parent = switchBg
 
@@ -324,7 +326,7 @@ function UI.CreateToggleSwitchRow(parent, labelText, stateKey)
     switchBg.MouseButton1Click:Connect(function()
         Core.State[stateKey] = not Core.State[stateKey]
         switchBg.BackgroundColor3 = Core.State[stateKey] and Core.Config.Theme.ToggleOn or Core.Config.Theme.ToggleOff
-        knob.Position = Core.State[stateKey] and UDim2.new(1, -22, 0.5, -10) or UDim2.new(0, 2, 0.5, -10)
+        knob.Position = Core.State[stateKey] and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7)
     end)
 
     return row
@@ -340,8 +342,8 @@ function UI.BuildMobileUI()
 
     local Main = Instance.new("Frame")
     Main.Name = "MainWindow"
-    Main.Size = UDim2.new(0, 310, 0, 320)
-    Main.Position = UDim2.new(0.5, -155, 0.5, -160)
+    Main.Size = UDim2.new(0, 250, 0, 245)
+    Main.Position = UDim2.new(0.5, -125, 0.5, -122)
     Main.BackgroundColor3 = Core.Config.Theme.Background
     Main.BorderSizePixel = 0
     Main.Active = true
@@ -349,37 +351,36 @@ function UI.BuildMobileUI()
     Main.Parent = ScreenGui
 
     local Corner = Instance.new("UICorner")
-    Corner.CornerRadius = UDim.new(0, 10)
+    Corner.CornerRadius = UDim.new(0, 8)
     Corner.Parent = Main
 
     local Stroke = Instance.new("UIStroke")
-    Stroke.Color = Color3.fromRGB(35, 45, 55)
+    Stroke.Color = Color3.fromRGB(0, 180, 220)
     Stroke.Thickness = 1
     Stroke.Parent = Main
 
     local Header = Instance.new("TextLabel")
     Header.Text = "XORQEN HUB"
     Header.Font = Enum.Font.GothamBold
-    Header.TextSize = 16
-    Header.TextColor3 = Core.Config.Theme.Text
+    Header.TextSize = 13
+    Header.TextColor3 = Core.Config.Theme.Accent
     Header.TextXAlignment = Enum.TextXAlignment.Left
-    Header.Position = UDim2.new(0, 14, 0, 10)
-    Header.Size = UDim2.new(1, -28, 0, 20)
+    Header.Position = UDim2.new(0, 10, 0, 8)
+    Header.Size = UDim2.new(1, -20, 0, 16)
     Header.BackgroundTransparency = 1
     Header.Parent = Main
 
     local Container = Instance.new("Frame")
-    Container.Size = UDim2.new(1, -28, 1, -40)
-    Container.Position = UDim2.new(0, 14, 0, 34)
+    Container.Size = UDim2.new(1, -20, 1, -32)
+    Container.Position = UDim2.new(0, 10, 0, 28)
     Container.BackgroundTransparency = 1
     Container.Parent = Main
 
     local layout = Instance.new("UIListLayout")
     layout.SortOrder = Enum.SortOrder.LayoutOrder
-    layout.Padding = UDim.new(0, 4)
+    layout.Padding = UDim.new(0, 3)
     layout.Parent = Container
 
-    -- 6 Requested Features mapped onto XORQEN HUB Design
     UI.CreateToggleSwitchRow(Container, "Passenger ESP", "PassengerESP")
     UI.CreateToggleSwitchRow(Container, "Flight Crew ESP", "CrewESP")
     UI.CreateToggleSwitchRow(Container, "Distance Indicators", "DistanceIndicators")
@@ -399,7 +400,7 @@ function Core.Init()
     Features.InitTaskESP()
     Features.InitSystemESP()
     Features.InitAutoEquipEmergency()
-    print("[XORQEN HUB] Loaded for Bumpy Flight with all 6 features.")
+    print("[XORQEN HUB v1.0.2] Loaded with compact slate blue UI.")
 end
 
 Core.Init()
