@@ -1,11 +1,11 @@
 -- ============================================================================
--- XORQEN HUB — BUMPY FLIGHT (ROBLOX) [CLOSE BUTTON BUILD]
--- Version: 1.0.4 (Close Button Added & Cleanup Handled)
+-- XORQEN HUB — BUMPY FLIGHT (ROBLOX) [MINIMIZE & RE-OPEN BUILD]
+-- Version: 1.0.6 (Minimize to Floating Button & Reopen Handled)
 -- ============================================================================
 
 local Core = {
     Config = {
-        Version = "1.0.4-CloseBtn",
+        Version = "1.0.6-Minimize",
         Theme = {
             Background = Color3.fromRGB(20, 26, 38),
             Card = Color3.fromRGB(30, 38, 54),
@@ -14,7 +14,8 @@ local Core = {
             Muted = Color3.fromRGB(120, 140, 160),
             ToggleOff = Color3.fromRGB(45, 55, 72),
             ToggleOn = Color3.fromRGB(0, 240, 255),
-            CloseRed = Color3.fromRGB(255, 75, 75),
+            CloseRed = Color3.fromRGB(220, 50, 50),
+            CloseRedHover = Color3.fromRGB(255, 70, 70),
             Passenger = Color3.fromRGB(0, 255, 150),
             Crew = Color3.fromRGB(255, 200, 0),
             TaskObj = Color3.fromRGB(0, 180, 255),
@@ -105,18 +106,6 @@ function Adapter.RemoveBillboard(id)
     if Core.Cache.Billboards[id] then
         Core.Cache.Billboards[id]:Destroy()
         Core.Cache.Billboards[id] = nil
-    end
-end
-
-function Core.DestroyHub()
-    for _, conn in pairs(Core.Connections) do
-        if conn then conn:Disconnect() end
-    end
-    for id, _ in pairs(Core.Cache.Billboards) do
-        Adapter.RemoveBillboard(id)
-    end
-    if Core.ScreenGui then
-        Core.ScreenGui:Destroy()
     end
 end
 
@@ -347,6 +336,7 @@ function UI.BuildMobileUI()
     if not ScreenGui.Parent then ScreenGui.Parent = Core.LocalPlayer:WaitForChild("PlayerGui") end
     Core.ScreenGui = ScreenGui
 
+    -- Main Hub Window
     local Main = Instance.new("Frame")
     Main.Name = "MainWindow"
     Main.Size = UDim2.new(0, 250, 0, 245)
@@ -374,37 +364,70 @@ function UI.BuildMobileUI()
     Header.TextColor3 = Core.Config.Theme.Accent
     Header.TextXAlignment = Enum.TextXAlignment.Left
     Header.Position = UDim2.new(0, 10, 0, 8)
-    Header.Size = UDim2.new(1, -40, 0, 16)
+    Header.Size = UDim2.new(1, -45, 0, 16)
     Header.BackgroundTransparency = 1
     Header.Parent = Main
 
-    -- Close (X) Button
+    -- Floating Open Toggle Button (Shown when Minimized)
+    local OpenBtn = Instance.new("TextButton")
+    OpenBtn.Name = "OpenButton"
+    OpenBtn.Text = "XORQEN"
+    OpenBtn.Font = Enum.Font.GothamBold
+    OpenBtn.TextSize = 11
+    OpenBtn.TextColor3 = Core.Config.Theme.Accent
+    OpenBtn.BackgroundColor3 = Core.Config.Theme.Background
+    OpenBtn.Size = UDim2.new(0, 75, 0, 30)
+    OpenBtn.Position = UDim2.new(0.02, 0, 0.45, 0)
+    OpenBtn.BorderSizePixel = 0
+    OpenBtn.Visible = false
+    OpenBtn.Active = true
+    OpenBtn.Draggable = true
+    OpenBtn.Parent = ScreenGui
+
+    local OpenCorner = Instance.new("UICorner")
+    OpenCorner.CornerRadius = UDim.new(0, 6)
+    OpenCorner.Parent = OpenBtn
+
+    local OpenStroke = Instance.new("UIStroke")
+    OpenStroke.Color = Color3.fromRGB(0, 180, 220)
+    OpenStroke.Thickness = 1
+    OpenStroke.Parent = OpenBtn
+
+    -- Red Close/Minimize (X) Button
     local CloseBtn = Instance.new("TextButton")
     CloseBtn.Name = "CloseButton"
-    CloseBtn.Text = "✕"
+    CloseBtn.Text = "X"
     CloseBtn.Font = Enum.Font.GothamBold
-    CloseBtn.TextSize = 13
-    CloseBtn.TextColor3 = Color3.fromRGB(180, 190, 205)
-    CloseBtn.BackgroundColor3 = Color3.fromRGB(30, 38, 54)
-    CloseBtn.Size = UDim2.new(0, 20, 0, 20)
-    CloseBtn.Position = UDim2.new(1, -26, 0, 6)
+    CloseBtn.TextSize = 12
+    CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CloseBtn.BackgroundColor3 = Core.Config.Theme.CloseRed
+    CloseBtn.Size = UDim2.new(0, 22, 0, 22)
+    CloseBtn.Position = UDim2.new(1, -28, 0, 6)
     CloseBtn.BorderSizePixel = 0
     CloseBtn.Parent = Main
 
     local CloseCorner = Instance.new("UICorner")
-    CloseCorner.CornerRadius = UDim.new(0, 4)
+    CloseCorner.CornerRadius = UDim.new(0, 5)
     CloseCorner.Parent = CloseBtn
 
     CloseBtn.MouseEnter:Connect(function()
-        CloseBtn.TextColor3 = Core.Config.Theme.CloseRed
+        CloseBtn.BackgroundColor3 = Core.Config.Theme.CloseRedHover
     end)
 
     CloseBtn.MouseLeave:Connect(function()
-        CloseBtn.TextColor3 = Color3.fromRGB(180, 190, 205)
+        CloseBtn.BackgroundColor3 = Core.Config.Theme.CloseRed
     end)
 
+    -- Minimize Action
     CloseBtn.MouseButton1Click:Connect(function()
-        Core.DestroyHub()
+        Main.Visible = false
+        OpenBtn.Visible = true
+    end)
+
+    -- Re-open Action
+    OpenBtn.MouseButton1Click:Connect(function()
+        Main.Visible = true
+        OpenBtn.Visible = false
     end)
 
     local Container = Instance.new("Frame")
@@ -434,7 +457,7 @@ function Core.Init()
     Features.InitTaskESP()
     Features.InitSystemESP()
     Features.InitAutoEquipEmergency()
-    print("[XORQEN HUB v1.0.4] Loaded with Close Button.")
+    print("[XORQEN HUB v1.0.6] Minimize and Restore Controls Loaded.")
 end
 
 Core.Init()
