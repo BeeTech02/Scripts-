@@ -1,12 +1,12 @@
 -- ============================================================================
 -- VORYZEN HUB — CLEAN ALL THE LEAVES (ROBLOX)
--- Fixed Header Visibility Update: Expanded Text Boundary & Proper Padding
--- Version: 1.3.4-VoryzenFixed
+-- Fixed Layout: Non-overlapping Header, Bold Hub Name, Visible Widgets
+-- Version: 1.3.5-VoryzenPerfect
 -- ============================================================================
 
 local Core = {
     Config = {
-        Version = "1.3.4-VoryzenFixed",
+        Version = "1.3.5-VoryzenPerfect",
         HubName = "VORYZEN HUB",
         GameName = "Clean All The Leaves",
         Theme = {
@@ -156,7 +156,7 @@ function Exploits.ToggleJumpPower(enabled)
 end
 
 -- ============================================================================
--- UI BUILDER (FULLY VISIBLE HEADER FIX)
+-- UI BUILDER
 -- ============================================================================
 local UI = {}
 
@@ -225,7 +225,7 @@ end
 
 function UI.BuildMobileUI()
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "VoryzenLeavesFixedGui"
+    ScreenGui.Name = "VoryzenLeavesPerfectGui"
     ScreenGui.ResetOnSpawn = false
 
     pcall(function() ScreenGui.Parent = Core.Services.CoreGui end)
@@ -262,7 +262,7 @@ function UI.BuildMobileUI()
     Header.ZIndex = 5
     Header.Parent = Main
 
-    -- Close Button (Placed first & anchored right so text never overlaps it)
+    -- Close Button (Locked to right edge safely)
     local CloseBtn = Instance.new("TextButton")
     CloseBtn.Name = "CloseButton"
     CloseBtn.Text = "×"
@@ -280,16 +280,16 @@ function UI.BuildMobileUI()
     CloseCorner.CornerRadius = UDim.new(1, 0)
     CloseCorner.Parent = CloseBtn
 
-    -- Header Title (Expanded width to 82% to guarantee full game name visibility)
+    -- Header Title (Bold Hub Name + Italic Game Name, safely bounded to prevent overlap)
     local HeaderTitle = Instance.new("TextLabel")
     HeaderTitle.Text = string.format("<b>%s</b> — <i>%s</i>", Core.Config.HubName, Core.Config.GameName)
     HeaderTitle.RichText = true
     HeaderTitle.Font = Enum.Font.Gotham
-    HeaderTitle.TextSize = 10.5
+    HeaderTitle.TextSize = 10
     HeaderTitle.TextColor3 = Core.Config.Theme.TextDark
     HeaderTitle.TextXAlignment = Enum.TextXAlignment.Left
     HeaderTitle.Position = UDim2.new(0, 4, 0, 0)
-    HeaderTitle.Size = UDim2.new(0.82, 0, 1, 0)
+    HeaderTitle.Size = UDim2.new(0.78, 0, 1, 0)
     HeaderTitle.BackgroundTransparency = 1
     HeaderTitle.ZIndex = 5
     HeaderTitle.Parent = Header
@@ -325,14 +325,14 @@ function UI.BuildMobileUI()
         OpenBtn.Visible = false
     end)
 
-    -- Scrolling Frame Container
+    -- Scrolling Frame Container (Ensures widgets never overlap header or overflow bounds)
     local ScrollContainer = Instance.new("ScrollingFrame")
     ScrollContainer.Name = "FeaturesScrollContainer"
-    ScrollContainer.Size = UDim2.new(1, -20, 1, -58)
-    ScrollContainer.Position = UDim2.new(0, 10, 0, 52)
+    ScrollContainer.Size = UDim2.new(1, -20, 1, -56)
+    ScrollContainer.Position = UDim2.new(0, 10, 0, 50)
     ScrollContainer.BackgroundTransparency = 1
     ScrollContainer.BorderSizePixel = 0
-    ScrollContainer.CanvasSize = UDim2.new(0, 0, 0, 530)
+    ScrollContainer.CanvasSize = UDim2.new(0, 0, 0, 540)
     ScrollContainer.ScrollBarThickness = 3
     ScrollContainer.Parent = Main
 
