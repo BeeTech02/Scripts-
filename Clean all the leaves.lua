@@ -1,12 +1,12 @@
 -- ============================================================================
 -- VORYZEN HUB — CLEAN ALL THE LEAVES (ROBLOX)
--- Fixed Batch Auto-Collect & Instant Dumpster Sell
--- Version: 1.3.8-VoryzenBatchFix
+-- Stable Utilities Edition (Removed Non-Working Auto-Farms)
+-- Version: 1.4.0-VoryzenStable
 -- ============================================================================
 
 local Core = {
     Config = {
-        Version = "1.3.8-VoryzenBatchFix",
+        Version = "1.4.0-VoryzenStable",
         HubName = "VORYZEN HUB",
         GameName = "Clean All The Leaves",
         Theme = {
@@ -22,13 +22,6 @@ local Core = {
         }
     },
     State = {
-        AutoCollect = false,
-        RadiusCollect = false,
-        AutoSell = false,
-        AutoUpgrades = false,
-        AutoTools = false,
-        AutoVent = false,
-        SpinClass = false,
         InfiniteJump = false,
         Noclip = false,
         SpeedBoost = false,
@@ -37,7 +30,6 @@ local Core = {
     Services = {
         Players = game:GetService("Players"),
         RunService = game:GetService("RunService"),
-        Workspace = game:GetService("Workspace"),
         CoreGui = game:GetService("CoreGui"),
         UserInputService = game:GetService("UserInputService")
     },
@@ -47,7 +39,7 @@ local Core = {
 Core.LocalPlayer = Core.Services.Players.LocalPlayer
 
 -- ============================================================================
--- GAME ADAPTER & EXPLOIT FUNCTIONS
+-- GAME ADAPTER & STABLE UTILITIES
 -- ============================================================================
 local Adapter = {}
 
@@ -56,65 +48,12 @@ function Adapter.GetCharacter(player)
     return player and player.Character
 end
 
-function Adapter.GetRootPart(player)
-    local char = Adapter.GetCharacter(player)
-    if not char then return nil end
-    return char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("Head") or char.PrimaryPart
-end
-
 function Adapter.GetHumanoid(player)
     local char = Adapter.GetCharacter(player)
     return char and char:FindFirstChildOfClass("Humanoid")
 end
 
 local Exploits = {}
-
-function Exploits.InitAutoCollect()
-    Core.Connections.AutoCollect = Core.Services.RunService.Heartbeat:Connect(function()
-        if not Core.State.AutoCollect and not Core.State.RadiusCollect then return end
-        local root = Adapter.GetRootPart()
-        if not root then return end
-
-        -- Loops through all descendants to catch entire bundles/folders of leaves at once
-        for _, obj in ipairs(Core.Services.Workspace:GetDescendants()) do
-            if obj:IsA("BasePart") or obj:IsA("Model") then
-                local name = obj.Name:lower()
-                if name:find("leaf") or name:find("leaves") then
-                    local targetPart = obj:IsA("Model") and (obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")) or obj
-                    if targetPart then
-                        if Core.State.AutoCollect then
-                            targetPart.CFrame = root.CFrame
-                        elseif Core.State.RadiusCollect then
-                            if (root.Position - targetPart.Position).Magnitude <= 40 then
-                                targetPart.CFrame = root.CFrame
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    end)
-end
-
-function Exploits.InitAutoSell()
-    Core.Connections.AutoSell = Core.Services.RunService.Heartbeat:Connect(function()
-        if not Core.State.AutoSell then return end
-        
-        for _, obj in ipairs(Core.Services.Workspace:GetDescendants()) do
-            if obj:IsA("ProximityPrompt") then
-                local actionText = obj.ActionText and obj.ActionText:lower() or ""
-                local objectText = obj.ObjectText and obj.ObjectText:lower() or ""
-                
-                if actionText:find("sell") or objectText:find("sell") or actionText:find("leave") or objectText:find("leave") or actionText:find("dump") then
-                    obj.HoldDuration = 0
-                    pcall(function()
-                        fireproximityprompt(obj)
-                    end)
-                end
-            end
-        end
-    end)
-end
 
 function Exploits.InitInfiniteJump()
     Core.Connections.InfJump = Core.Services.UserInputService.JumpRequest:Connect(function()
@@ -226,7 +165,7 @@ end
 
 function UI.BuildMobileUI()
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "VoryzenLeavesBatchGui"
+    ScreenGui.Name = "VoryzenStableGui"
     ScreenGui.ResetOnSpawn = false
 
     pcall(function() ScreenGui.Parent = Core.Services.CoreGui end)
@@ -235,8 +174,8 @@ function UI.BuildMobileUI()
     -- Main Window Panel
     local Main = Instance.new("Frame")
     Main.Name = "MainWindow"
-    Main.Size = UDim2.new(0, 320, 0, 380)
-    Main.Position = UDim2.new(0.5, -160, 0.5, -190)
+    Main.Size = UDim2.new(0, 320, 0, 260)
+    Main.Position = UDim2.new(0.5, -160, 0.5, -130)
     Main.BackgroundColor3 = Core.Config.Theme.MainBg
     Main.BackgroundTransparency = Core.Config.Theme.MainBgTransparency
     Main.BorderSizePixel = 0
@@ -281,7 +220,7 @@ function UI.BuildMobileUI()
     CloseCorner.CornerRadius = UDim.new(1, 0)
     CloseCorner.Parent = CloseBtn
 
-    -- Header Title (Bold Hub Name + Italic Game Name)
+    -- Header Title
     local HeaderTitle = Instance.new("TextLabel")
     HeaderTitle.Text = string.format("<b>%s</b> — <i>%s</i>", Core.Config.HubName, Core.Config.GameName)
     HeaderTitle.RichText = true
@@ -333,7 +272,7 @@ function UI.BuildMobileUI()
     ScrollContainer.Position = UDim2.new(0, 10, 0, 50)
     ScrollContainer.BackgroundTransparency = 1
     ScrollContainer.BorderSizePixel = 0
-    ScrollContainer.CanvasSize = UDim2.new(0, 0, 0, 540)
+    ScrollContainer.CanvasSize = UDim2.new(0, 0, 0, 200)
     ScrollContainer.ScrollBarThickness = 3
     ScrollContainer.Parent = Main
 
@@ -342,13 +281,6 @@ function UI.BuildMobileUI()
     layout.Padding = UDim.new(0, 6)
     layout.Parent = ScrollContainer
 
-    UI.CreateToggleSwitchRow(ScrollContainer, "Auto Collect Leaves", "AutoCollect")
-    UI.CreateToggleSwitchRow(ScrollContainer, "Radius Auto Collect", "RadiusCollect")
-    UI.CreateToggleSwitchRow(ScrollContainer, "Auto Sell to Dumpster", "AutoSell")
-    UI.CreateToggleSwitchRow(ScrollContainer, "Auto Bag & Upgrades", "AutoUpgrades")
-    UI.CreateToggleSwitchRow(ScrollContainer, "Auto Buy & Equip Tools", "AutoTools")
-    UI.CreateToggleSwitchRow(ScrollContainer, "Auto Vent", "AutoVent")
-    UI.CreateToggleSwitchRow(ScrollContainer, "Spin for Class", "SpinClass")
     UI.CreateToggleSwitchRow(ScrollContainer, "Infinite Jump", "InfiniteJump")
     UI.CreateToggleSwitchRow(ScrollContainer, "Noclip", "Noclip")
     UI.CreateToggleSwitchRow(ScrollContainer, "Speed Boost (32 WS)", "SpeedBoost", Exploits.ToggleSpeed)
@@ -362,8 +294,6 @@ end
 -- ============================================================================
 function Core.Init()
     UI.BuildMobileUI()
-    Exploits.InitAutoCollect()
-    Exploits.InitAutoSell()
     Exploits.InitInfiniteJump()
     Exploits.InitNoclip()
     print("[" .. Core.Config.HubName .. " — " .. Core.Config.GameName .. "] Initialized Successfully.")
