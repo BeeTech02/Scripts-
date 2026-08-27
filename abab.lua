@@ -1,26 +1,26 @@
 -- ============================================================================
--- VORYZEN HUB — BUMPY FLIGHT (ROBLOX)
--- Master UI Match: Amethyst Purple Glassmorphic Style
--- Version: 1.0.9-VoryzenAmethyst
+-- NYZORA HUB — BUMPY FLIGHT (ROBLOX)
+-- Master UI Match: Pumpkin Orange Glassmorphic Style
+-- Version: 1.1.0-NyzoraPumpkin
 -- ============================================================================
 
 local Core = {
     Config = {
-        Version = "1.0.9-VoryzenAmethyst",
-        HubName = "VORYZEN HUB",
+        Version = "1.1.0-NyzoraPumpkin",
+        HubName = "NYZORA HUB",
         Theme = {
-            MainBg = Color3.fromRGB(155, 120, 195),          -- Amethyst Glass Panel
+            MainBg = Color3.fromRGB(245, 130, 60),           -- Pumpkin Glass Panel
             MainBgTransparency = 0.25,                        -- Semi-transparent glass fill
-            CardBg = Color3.fromRGB(220, 205, 240),          -- Soft Lavender Inner Card
+            CardBg = Color3.fromRGB(255, 215, 185),          -- Soft Peach Inner Card
             CardBgTransparency = 0.35,                        -- Inner Card transparency
-            AmethystBorder = Color3.fromRGB(120, 80, 170),    -- Deep Violet Outline Accent
-            TextDark = Color3.fromRGB(30, 20, 45),            -- Dark Amethyst/Slate Text
-            ToggleOn = Color3.fromRGB(140, 80, 210),           -- Vivid Amethyst Active Switch
-            ToggleOff = Color3.fromRGB(185, 175, 200),         -- Greyish Lavender Inactive Switch
+            PumpkinBorder = Color3.fromRGB(210, 95, 30),     -- Deep Warm Orange Border Accent
+            TextDark = Color3.fromRGB(45, 25, 15),            -- Dark Charcoal/Warm Slate Text
+            ToggleOn = Color3.fromRGB(235, 100, 30),          -- Vivid Pumpkin Active Switch
+            ToggleOff = Color3.fromRGB(210, 190, 180),        -- Muted Peach-Grey Inactive Switch
             CloseRed = Color3.fromRGB(255, 85, 100),           -- Red Circular Close Button
-            Passenger = Color3.fromRGB(160, 90, 220),
+            Passenger = Color3.fromRGB(235, 110, 30),
             Crew = Color3.fromRGB(220, 150, 0),
-            TaskObj = Color3.fromRGB(130, 110, 240),
+            TaskObj = Color3.fromRGB(240, 140, 50),
             System = Color3.fromRGB(220, 50, 60)
         }
     },
@@ -227,7 +227,7 @@ function Features.InitSystemESP()
                     bill.Enabled = true
 
                     local val = obj:FindFirstChild("Level") or obj:FindFirstChild("Value") or obj:FindFirstChild("Health")
-                    local valStr = val and string.format(" (%s)", tostring(val.Value)) or ""
+                    valStr = val and string.format(" (%s)", tostring(val.Value)) or ""
 
                     local distStr = ""
                     if Core.State.DistanceIndicators and myRoot then
@@ -285,7 +285,7 @@ function Features.InitAutoEquipEmergency()
 end
 
 -- ============================================================================
--- UI BUILDER (AMETHYST VORYZEN HUB DESIGN)
+-- UI BUILDER (PUMPKIN NYZORA HUB DESIGN)
 -- ============================================================================
 local UI = {}
 
@@ -302,7 +302,7 @@ function UI.CreateToggleSwitchRow(parent, labelText, stateKey)
     cardCorner.Parent = card
 
     local cardStroke = Instance.new("UIStroke")
-    cardStroke.Color = Core.Config.Theme.AmethystBorder
+    cardStroke.Color = Core.Config.Theme.PumpkinBorder
     cardStroke.Thickness = 1.2
     cardStroke.Transparency = 0.3
     cardStroke.Parent = card
@@ -353,7 +353,7 @@ end
 
 function UI.BuildMobileUI()
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "VoryzenHubGui"
+    ScreenGui.Name = "NyzoraHubGui"
     ScreenGui.ResetOnSpawn = false
 
     pcall(function() ScreenGui.Parent = Core.Services.CoreGui end)
@@ -376,7 +376,7 @@ function UI.BuildMobileUI()
     MainCorner.Parent = Main
 
     local MainStroke = Instance.new("UIStroke")
-    MainStroke.Color = Core.Config.Theme.AmethystBorder
+    MainStroke.Color = Core.Config.Theme.PumpkinBorder
     MainStroke.Thickness = 1.5
     MainStroke.Transparency = 0.2
     MainStroke.Parent = Main
@@ -416,7 +416,7 @@ function UI.BuildMobileUI()
     CloseCorner.CornerRadius = UDim.new(1, 0)
     CloseCorner.Parent = CloseBtn
 
-    -- Master Floating Capsule Button Widget (Amethyst)
+    -- Master Floating Capsule Button Widget (Pumpkin)
     local OpenBtn = Instance.new("TextButton")
     OpenBtn.Name = "OpenButton"
     OpenBtn.Text = Core.Config.HubName
