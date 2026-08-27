@@ -1,13 +1,13 @@
 -- ============================================================================
 -- XORQEN HUB — DIRECT LUA BUILDER (TURQUOISE OS 26 GLASS WIDGET EDITION)
 -- Target Game: Cheating During Testing [BETA] (Roblox)
--- Architecture: Dynamic Turquoise Theme + Floating Drag Bubble + OS 26 Glass
--- Version: 2.4.0-TurquoiseSymbol
+-- Architecture: Dynamic Turquoise Theme + Profile Image Badge + OS 26 Glass
+-- Version: 2.5.0-ProfileImage
 -- ============================================================================
 
 local Core = {
     Config = {
-        Version = "2.4.0-TurquoiseSymbol",
+        Version = "2.5.0-ProfileImage",
         Theme = {
             Turquoise = Color3.fromRGB(64, 224, 208),     -- Vibrant Turquoise Accent
             TurquoiseDark = Color3.fromRGB(15, 55, 60),    -- Tinted Dark Turquoise Glass
@@ -350,15 +350,28 @@ function UI.BuildMobileUI()
     Header.BackgroundTransparency = 1
     Header.Parent = Main
 
-    -- XORQEN HUB TITLE WITH INTEGRATED "X" BRAND SYMBOL
+    -- HEADER PROFILE IMAGE ICON
+    local HeaderIcon = Instance.new("ImageLabel")
+    HeaderIcon.Name = "HubIcon"
+    HeaderIcon.Size = UDim2.new(0, 22, 0, 22)
+    HeaderIcon.Position = UDim2.new(0, 2, 0.5, -11)
+    HeaderIcon.BackgroundTransparency = 1
+    HeaderIcon.Image = "rbxassetid://0" -- Replace with your uploaded image asset ID
+    HeaderIcon.Parent = Header
+
+    local HeaderIconCorner = Instance.new("UICorner")
+    HeaderIconCorner.CornerRadius = UDim.new(0, 6)
+    HeaderIconCorner.Parent = HeaderIcon
+
+    -- XORQEN HUB TITLE (Symbol Removed)
     local HeaderTitle = Instance.new("TextLabel")
-    HeaderTitle.Text = "✖ XORQEN HUB"
+    HeaderTitle.Text = "XORQEN HUB"
     HeaderTitle.Font = Enum.Font.GothamBold
-    HeaderTitle.TextSize = 14
+    HeaderTitle.TextSize = 13
     HeaderTitle.TextColor3 = Core.Config.Theme.Turquoise
     HeaderTitle.TextXAlignment = Enum.TextXAlignment.Left
-    HeaderTitle.Position = UDim2.new(0, 4, 0, 0)
-    HeaderTitle.Size = UDim2.new(0.75, 0, 1, 0)
+    HeaderTitle.Position = UDim2.new(0, 30, 0, 0)
+    HeaderTitle.Size = UDim2.new(0.65, 0, 1, 0)
     HeaderTitle.BackgroundTransparency = 1
     HeaderTitle.Parent = Header
 
@@ -380,20 +393,17 @@ function UI.BuildMobileUI()
     CloseCorner.CornerRadius = UDim.new(1, 0) -- Perfect Circle
     CloseCorner.Parent = CloseBtn
 
-    -- DRAGGABLE WIDGET BUBBLE WITH "X" SYMBOL (STATIC SOLID HUB NAME NO NEON EFFECT)
+    -- DRAGGABLE WIDGET BUBBLE WITH PROFILE IMAGE ICON (STATIC SOLID HUB NAME NO NEON EFFECT)
     local OpenBtn = Instance.new("TextButton")
     OpenBtn.Name = "OpenButton"
-    OpenBtn.Text = "✖ XORQEN HUB"
-    OpenBtn.Font = Enum.Font.GothamBold
-    OpenBtn.TextSize = 12
-    OpenBtn.TextColor3 = Color3.fromRGB(255, 255, 255) -- Clean Solid White Text
-    OpenBtn.BackgroundColor3 = Color3.fromRGB(15, 35, 40)
-    OpenBtn.BackgroundTransparency = 0.2
-    OpenBtn.Size = UDim2.new(0, 135, 0, 38)
+    OpenBtn.Text = ""
+    OpenBtn.Size = UDim2.new(0, 140, 0, 38)
     OpenBtn.Position = UDim2.new(0.05, 0, 0.2, 0)
     OpenBtn.Visible = false
     OpenBtn.Active = true
     OpenBtn.Draggable = true -- Draggable Bubble
+    OpenBtn.BackgroundColor3 = Color3.fromRGB(15, 35, 40)
+    OpenBtn.BackgroundTransparency = 0.2
     OpenBtn.BorderSizePixel = 0
     OpenBtn.Parent = ScreenGui
 
@@ -406,6 +416,31 @@ function UI.BuildMobileUI()
     OpenStroke.Thickness = 1.5
     OpenStroke.Transparency = 0.2
     OpenStroke.Parent = OpenBtn
+
+    -- WIDGET BUBBLE PROFILE IMAGE ICON
+    local OpenIcon = Instance.new("ImageLabel")
+    OpenIcon.Name = "HubIcon"
+    OpenIcon.Size = UDim2.new(0, 24, 0, 24)
+    OpenIcon.Position = UDim2.new(0, 8, 0.5, -12)
+    OpenIcon.BackgroundTransparency = 1
+    OpenIcon.Image = "rbxassetid://0" -- Replace with your uploaded image asset ID
+    OpenIcon.Parent = OpenBtn
+
+    local OpenIconCorner = Instance.new("UICorner")
+    OpenIconCorner.CornerRadius = UDim.new(0, 6)
+    OpenIconCorner.Parent = OpenIcon
+
+    -- WIDGET BUBBLE TITLE TEXT
+    local OpenText = Instance.new("TextLabel")
+    OpenText.Text = "XORQEN HUB"
+    OpenText.Font = Enum.Font.GothamBold
+    OpenText.TextSize = 11
+    OpenText.TextColor3 = Color3.fromRGB(255, 255, 255) -- Clean Solid White Text
+    OpenText.TextXAlignment = Enum.TextXAlignment.Left
+    OpenText.Position = UDim2.new(0, 38, 0, 0)
+    OpenText.Size = UDim2.new(1, -38, 1, 0)
+    OpenText.BackgroundTransparency = 1
+    OpenText.Parent = OpenBtn
 
     -- Window Switch Events
     CloseBtn.MouseButton1Click:Connect(function()
@@ -462,7 +497,7 @@ function Core.Init()
     Features.InitDeskSnapping()
     Features.InitAntiDetect()
     Features.InitTeacherPatrols()
-    print("[XORQEN HUB] Loaded with 'X' Symbol Branding & Draggable Widget Bubble.")
+    print("[XORQEN HUB] Loaded with Profile Image & Clean UI Layout.")
 end
 
 Core.Init()
