@@ -1,22 +1,23 @@
 -- ============================================================================
 -- XORQEN HUB — BUMPY FLIGHT (ROBLOX)
--- Theme: Official XORQEN HUB Mint/Teal UI with Turquoise Floating Text
--- Version: 1.0.7-XorqenOfficialUI
+-- Master UI Match: Semi-Transparent Mint Pill Floating Button
+-- Version: 1.0.8-MasterUIMatch
 -- ============================================================================
 
 local Core = {
     Config = {
-        Version = "1.0.7-XorqenOfficialUI",
+        Version = "1.0.8-MasterUIMatch",
         HubName = "XORQEN HUB",
         Theme = {
-            MainBg = Color3.fromRGB(162, 230, 225),          -- Bright Mint/Turquoise Panel
-            CardBg = Color3.fromRGB(188, 242, 238),          -- Inner Card Mint Fill
-            TealBorder = Color3.fromRGB(14, 150, 150),        -- Sharp Dark Teal Outline
-            TextDark = Color3.fromRGB(15, 25, 28),            -- High-Contrast Dark Text
-            WidgetTextTeal = Color3.fromRGB(14, 150, 150),     -- Turquoise Floating Button Text
-            ToggleOn = Color3.fromRGB(0, 185, 185),           -- Solid Cyan/Teal Active Switch
-            ToggleOff = Color3.fromRGB(160, 180, 180),         -- Grey Inactive Switch Fill
-            CloseRed = Color3.fromRGB(255, 75, 90),           -- Red Circular Close Button
+            MainBg = Color3.fromRGB(162, 230, 225),          -- Glassmorphic Mint Panel
+            MainBgTransparency = 0.25,                        -- Semi-transparent glass fill
+            CardBg = Color3.fromRGB(205, 245, 242),          -- Inner Card Mint Fill
+            CardBgTransparency = 0.35,                        -- Inner Card transparency
+            TealBorder = Color3.fromRGB(70, 190, 180),        -- Subtle Mint/Teal Outline
+            TextDark = Color3.fromRGB(25, 40, 42),            -- High-Contrast Dark Slate Text
+            ToggleOn = Color3.fromRGB(40, 195, 180),           -- Solid Cyan/Teal Active Switch
+            ToggleOff = Color3.fromRGB(180, 200, 198),         -- Grey Inactive Switch Fill
+            CloseRed = Color3.fromRGB(255, 85, 100),           -- Circular Red Close Button
             Passenger = Color3.fromRGB(0, 180, 120),
             Crew = Color3.fromRGB(220, 150, 0),
             TaskObj = Color3.fromRGB(0, 150, 220),
@@ -284,7 +285,7 @@ function Features.InitAutoEquipEmergency()
 end
 
 -- ============================================================================
--- UI BUILDER (EXACT XORQEN HUB BLUEPRINT)
+-- UI BUILDER (MASTER XORQEN HUB DESIGN)
 -- ============================================================================
 local UI = {}
 
@@ -292,16 +293,18 @@ function UI.CreateToggleSwitchRow(parent, labelText, stateKey)
     local card = Instance.new("Frame")
     card.Size = UDim2.new(1, 0, 0, 42)
     card.BackgroundColor3 = Core.Config.Theme.CardBg
+    card.BackgroundTransparency = Core.Config.Theme.CardBgTransparency
     card.BorderSizePixel = 0
     card.Parent = parent
 
     local cardCorner = Instance.new("UICorner")
-    cardCorner.CornerRadius = UDim.new(0, 12)
+    cardCorner.CornerRadius = UDim.new(0, 14)
     cardCorner.Parent = card
 
     local cardStroke = Instance.new("UIStroke")
     cardStroke.Color = Core.Config.Theme.TealBorder
-    cardStroke.Thickness = 1.5
+    cardStroke.Thickness = 1.2
+    cardStroke.Transparency = 0.3
     cardStroke.Parent = card
 
     local label = Instance.new("TextLabel")
@@ -356,27 +359,29 @@ function UI.BuildMobileUI()
     pcall(function() ScreenGui.Parent = Core.Services.CoreGui end)
     if not ScreenGui.Parent then ScreenGui.Parent = Core.LocalPlayer:WaitForChild("PlayerGui") end
 
-    -- Main Window Panel
+    -- Main Panel Window
     local Main = Instance.new("Frame")
     Main.Name = "MainWindow"
     Main.Size = UDim2.new(0, 320, 0, 340)
     Main.Position = UDim2.new(0.5, -160, 0.5, -170)
     Main.BackgroundColor3 = Core.Config.Theme.MainBg
+    Main.BackgroundTransparency = Core.Config.Theme.MainBgTransparency
     Main.BorderSizePixel = 0
     Main.Active = true
     Main.Draggable = true
     Main.Parent = ScreenGui
 
     local MainCorner = Instance.new("UICorner")
-    MainCorner.CornerRadius = UDim.new(0, 18)
+    MainCorner.CornerRadius = UDim.new(0, 22)
     MainCorner.Parent = Main
 
     local MainStroke = Instance.new("UIStroke")
     MainStroke.Color = Core.Config.Theme.TealBorder
-    MainStroke.Thickness = 2
+    MainStroke.Thickness = 1.5
+    MainStroke.Transparency = 0.2
     MainStroke.Parent = Main
 
-    -- Header Panel
+    -- Header Section
     local Header = Instance.new("Frame")
     Header.Size = UDim2.new(1, -20, 0, 36)
     Header.Position = UDim2.new(0, 10, 0, 10)
@@ -394,7 +399,7 @@ function UI.BuildMobileUI()
     HeaderTitle.BackgroundTransparency = 1
     HeaderTitle.Parent = Header
 
-    -- Close (X) Button
+    -- Red Circular Close Button
     local CloseBtn = Instance.new("TextButton")
     CloseBtn.Name = "CloseButton"
     CloseBtn.Text = "×"
@@ -411,32 +416,28 @@ function UI.BuildMobileUI()
     CloseCorner.CornerRadius = UDim.new(1, 0)
     CloseCorner.Parent = CloseBtn
 
-    -- Floating Open Widget Button
+    -- Master Floating Capsule Button Widget
     local OpenBtn = Instance.new("TextButton")
     OpenBtn.Name = "OpenButton"
     OpenBtn.Text = Core.Config.HubName
     OpenBtn.Font = Enum.Font.GothamBold
     OpenBtn.TextSize = 13
-    OpenBtn.TextColor3 = Core.Config.Theme.WidgetTextTeal
-    OpenBtn.Size = UDim2.new(0, 140, 0, 40)
-    OpenBtn.Position = UDim2.new(0.05, 0, 0.2, 0)
+    OpenBtn.TextColor3 = Core.Config.Theme.TextDark
+    OpenBtn.Size = UDim2.new(0, 160, 0, 42)
+    OpenBtn.Position = UDim2.new(0.05, 0, 0.15, 0)
     OpenBtn.Visible = false
     OpenBtn.Active = true
     OpenBtn.Draggable = true
     OpenBtn.BackgroundColor3 = Core.Config.Theme.MainBg
+    OpenBtn.BackgroundTransparency = Core.Config.Theme.MainBgTransparency
     OpenBtn.BorderSizePixel = 0
     OpenBtn.Parent = ScreenGui
 
     local OpenCorner = Instance.new("UICorner")
-    OpenCorner.CornerRadius = UDim.new(1, 0)
+    OpenCorner.CornerRadius = UDim.new(1, 0) -- Full pill shape matching master screenshot
     OpenCorner.Parent = OpenBtn
 
-    local OpenStroke = Instance.new("UIStroke")
-    OpenStroke.Color = Core.Config.Theme.TealBorder
-    OpenStroke.Thickness = 2
-    OpenStroke.Parent = OpenBtn
-
-    -- Display Toggle Actions
+    -- Minimize and Restore Logic
     CloseBtn.MouseButton1Click:Connect(function()
         Main.Visible = false
         OpenBtn.Visible = true
@@ -447,7 +448,7 @@ function UI.BuildMobileUI()
         OpenBtn.Visible = false
     end)
 
-    -- Container for Options
+    -- Container for Toggles
     local Container = Instance.new("Frame")
     Container.Size = UDim2.new(1, -24, 1, -56)
     Container.Position = UDim2.new(0, 12, 0, 48)
