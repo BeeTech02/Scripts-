@@ -1,23 +1,18 @@
 -- ============================================================================
 -- XORQEN HUB CONFIGURATION & SOURCE CODE
--- Name: XORQEN HUB
--- Theme: Turquoise Cyber Glow
--- Identity Icon: Aligned Left Profile Image Badge
+-- Theme: Dark Slate Gray & Turquoise Glow
+-- Layout: Text-Only Header & Bubble Widget Alignment
 -- ============================================================================
 
 local Core = {
     Config = {
-        Version = "2.8.0-ImageAssetFix",
+        Version = "3.0.0-CleanNoImages",
         HubName = "XORQEN HUB",
-        
-        -- 👇 REPLACE THE DIGITS BELOW WITH YOUR ROBLOX DECAL / IMAGE ID 👇
-        HubAssetId = "10723345518", 
-        
         Theme = {
-            Turquoise = Color3.fromRGB(64, 224, 208),     -- Main Accent Color
-            TurquoiseDark = Color3.fromRGB(15, 55, 60),    -- Background Tint
-            TurquoiseGlow = Color3.fromRGB(0, 245, 212),    -- Glow Pulse Color
-            Text = Color3.fromRGB(240, 255, 255),
+            Turquoise = Color3.fromRGB(64, 224, 208),      -- Active Accent Color
+            TurquoiseGlow = Color3.fromRGB(0, 245, 212),     -- Glow Pulse Color
+            DarkSlateBg = Color3.fromRGB(30, 34, 32),       -- Bubble & UI Dark Gray
+            TextWhite = Color3.fromRGB(255, 255, 255),       -- White Text
             ToggleOff = Color3.fromRGB(20, 35, 40),
             CloseRed = Color3.fromRGB(255, 60, 80),
             Warning = Color3.fromRGB(255, 170, 0),
@@ -40,15 +35,6 @@ local Core = {
 }
 
 Core.LocalPlayer = Core.Services.Players.LocalPlayer
-
--- Helper function to format any ID safely
-local function GetFormattedImage(id)
-    id = tostring(id):gsub("%D", "") -- Remove non-numeric characters
-    if #id == 0 then
-        return "rbxassetid://10723345518"
-    end
-    return "rbxassetid://" .. id
-end
 
 -- ============================================================================
 -- GAME ADAPTER
@@ -254,8 +240,8 @@ function UI.CreateToggleSwitchRow(parent, labelText, stateKey)
 
     local glassBg = Instance.new("Frame")
     glassBg.Size = UDim2.new(1, 0, 1, 0)
-    glassBg.BackgroundColor3 = Color3.fromRGB(10, 30, 35)
-    glassBg.BackgroundTransparency = 0.45
+    glassBg.BackgroundColor3 = Color3.fromRGB(15, 20, 20)
+    glassBg.BackgroundTransparency = 0.35
     glassBg.Parent = widgetCard
 
     local cardCorner = Instance.new("UICorner")
@@ -263,7 +249,7 @@ function UI.CreateToggleSwitchRow(parent, labelText, stateKey)
     cardCorner.Parent = glassBg
 
     local cardStroke = Instance.new("UIStroke")
-    cardStroke.Color = Core.State[stateKey] and Core.Config.Theme.Turquoise or Color3.fromRGB(30, 70, 75)
+    cardStroke.Color = Core.State[stateKey] and Core.Config.Theme.Turquoise or Color3.fromRGB(45, 55, 55)
     cardStroke.Thickness = 1.25
     cardStroke.Transparency = 0.1
     cardStroke.Parent = glassBg
@@ -272,7 +258,7 @@ function UI.CreateToggleSwitchRow(parent, labelText, stateKey)
     label.Text = labelText
     label.Font = Enum.Font.GothamBold
     label.TextSize = 12
-    label.TextColor3 = Core.Config.Theme.Text
+    label.TextColor3 = Core.Config.Theme.TextWhite
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Position = UDim2.new(0, 12, 0, 0)
     label.Size = UDim2.new(0.6, 0, 1, 0)
@@ -312,7 +298,7 @@ function UI.CreateToggleSwitchRow(parent, labelText, stateKey)
         Core.State[stateKey] = not Core.State[stateKey]
         local active = Core.State[stateKey]
         switchBg.BackgroundColor3 = active and Core.Config.Theme.Turquoise or Core.Config.Theme.ToggleOff
-        cardStroke.Color = active and Core.Config.Theme.Turquoise or Color3.fromRGB(30, 70, 75)
+        cardStroke.Color = active and Core.Config.Theme.Turquoise or Color3.fromRGB(45, 55, 55)
         switchStroke.Color = active and Core.Config.Theme.TurquoiseGlow or Color3.fromRGB(45, 85, 90)
         knob.Position = active and UDim2.new(1, -20, 0.5, -9) or UDim2.new(0, 2, 0.5, -9)
     end)
@@ -340,8 +326,8 @@ function UI.BuildMobileUI()
 
     local MainBgPanel = Instance.new("Frame")
     MainBgPanel.Size = UDim2.new(1, 0, 1, 0)
-    MainBgPanel.BackgroundColor3 = Core.Config.Theme.TurquoiseDark
-    MainBgPanel.BackgroundTransparency = 0.25
+    MainBgPanel.BackgroundColor3 = Core.Config.Theme.DarkSlateBg
+    MainBgPanel.BackgroundTransparency = 0.1
     MainBgPanel.Parent = Main
 
     local MainCorner = Instance.new("UICorner")
@@ -360,31 +346,17 @@ function UI.BuildMobileUI()
     Header.BackgroundTransparency = 1
     Header.Parent = Main
 
-    -- Identity Profile Image Badge
-    local HeaderIcon = Instance.new("ImageLabel")
-    HeaderIcon.Name = "HubIcon"
-    HeaderIcon.Size = UDim2.new(0, 24, 0, 24)
-    HeaderIcon.Position = UDim2.new(0, 0, 0.5, -12)
-    HeaderIcon.BackgroundTransparency = 1
-    HeaderIcon.Image = GetFormattedImage(Core.Config.HubAssetId)
-    HeaderIcon.ZIndex = 10
-    HeaderIcon.Parent = Header
-
-    local HeaderIconCorner = Instance.new("UICorner")
-    HeaderIconCorner.CornerRadius = UDim.new(0, 6)
-    HeaderIconCorner.Parent = HeaderIcon
-
-    -- Hub Title Positioned Beside Icon
+    -- Text-Only Hub Title (Properly Centered / Aligned)
     local HeaderTitle = Instance.new("TextLabel")
     HeaderTitle.Text = Core.Config.HubName
     HeaderTitle.Font = Enum.Font.GothamBold
-    HeaderTitle.TextSize = 13
+    HeaderTitle.TextSize = 14
     HeaderTitle.TextColor3 = Core.Config.Theme.Turquoise
     HeaderTitle.TextXAlignment = Enum.TextXAlignment.Left
-    HeaderTitle.Position = UDim2.new(0, 32, 0, 0)
-    HeaderTitle.Size = UDim2.new(0.65, 0, 1, 0)
+    HeaderTitle.Position = UDim2.new(0, 10, 0, 0)
+    HeaderTitle.Size = UDim2.new(0.7, 0, 1, 0)
     HeaderTitle.BackgroundTransparency = 1
-    HeaderTitle.ZIndex = 10
+    HeaderTitle.ZIndex = 5
     HeaderTitle.Parent = Header
 
     -- Close Button
@@ -398,63 +370,48 @@ function UI.BuildMobileUI()
     CloseBtn.BackgroundTransparency = 0.1
     CloseBtn.BorderSizePixel = 0
     CloseBtn.Size = UDim2.new(0, 24, 0, 24)
-    CloseBtn.Position = UDim2.new(1, -26, 0, 4)
-    CloseBtn.ZIndex = 10
+    CloseBtn.Position = UDim2.new(1, -24, 0, 4)
+    CloseBtn.ZIndex = 5
     CloseBtn.Parent = Header
 
     local CloseCorner = Instance.new("UICorner")
     CloseCorner.CornerRadius = UDim.new(1, 0)
     CloseCorner.Parent = CloseBtn
 
-    -- Draggable Floating Widget Bubble
+    -- Draggable Floating Widget Bubble (Matches Screenshot Slate Gray & White Text)
     local OpenBtn = Instance.new("TextButton")
     OpenBtn.Name = "OpenButton"
     OpenBtn.Text = ""
-    OpenBtn.Size = UDim2.new(0, 140, 0, 38)
+    OpenBtn.Size = UDim2.new(0, 160, 0, 42)
     OpenBtn.Position = UDim2.new(0.05, 0, 0.2, 0)
     OpenBtn.Visible = false
     OpenBtn.Active = true
     OpenBtn.Draggable = true
-    OpenBtn.BackgroundColor3 = Color3.fromRGB(15, 35, 40)
-    OpenBtn.BackgroundTransparency = 0.2
+    OpenBtn.BackgroundColor3 = Core.Config.Theme.DarkSlateBg
+    OpenBtn.BackgroundTransparency = 0.05
     OpenBtn.BorderSizePixel = 0
     OpenBtn.Parent = ScreenGui
 
     local OpenCorner = Instance.new("UICorner")
-    OpenCorner.CornerRadius = UDim.new(0, 19)
+    OpenCorner.CornerRadius = UDim.new(1, 0) -- Full rounded pill shape
     OpenCorner.Parent = OpenBtn
 
     local OpenStroke = Instance.new("UIStroke")
-    OpenStroke.Color = Core.Config.Theme.Turquoise
-    OpenStroke.Thickness = 1.5
-    OpenStroke.Transparency = 0.2
+    OpenStroke.Color = Color3.fromRGB(60, 65, 62)
+    OpenStroke.Thickness = 1.2
     OpenStroke.Parent = OpenBtn
 
-    -- Widget Bubble Image Badge (Left Aligned)
-    local OpenIcon = Instance.new("ImageLabel")
-    OpenIcon.Name = "HubIcon"
-    OpenIcon.Size = UDim2.new(0, 24, 0, 24)
-    OpenIcon.Position = UDim2.new(0, 8, 0.5, -12)
-    OpenIcon.BackgroundTransparency = 1
-    OpenIcon.Image = GetFormattedImage(Core.Config.HubAssetId)
-    OpenIcon.ZIndex = 10
-    OpenIcon.Parent = OpenBtn
-
-    local OpenIconCorner = Instance.new("UICorner")
-    OpenIconCorner.CornerRadius = UDim.new(0, 6)
-    OpenIconCorner.Parent = OpenIcon
-
-    -- Widget Bubble Title
+    -- Widget Bubble Title Text
     local OpenText = Instance.new("TextLabel")
     OpenText.Text = Core.Config.HubName
     OpenText.Font = Enum.Font.GothamBold
-    OpenText.TextSize = 11
-    OpenText.TextColor3 = Color3.fromRGB(255, 255, 255)
-    OpenText.TextXAlignment = Enum.TextXAlignment.Left
-    OpenText.Position = UDim2.new(0, 38, 0, 0)
-    OpenText.Size = UDim2.new(1, -38, 1, 0)
+    OpenText.TextSize = 13
+    OpenText.TextColor3 = Core.Config.Theme.TextWhite
+    OpenText.TextXAlignment = Enum.TextXAlignment.Center
+    OpenText.Position = UDim2.new(0, 0, 0, 0)
+    OpenText.Size = UDim2.new(1, 0, 1, 0)
     OpenText.BackgroundTransparency = 1
-    OpenText.ZIndex = 10
+    OpenText.ZIndex = 5
     OpenText.Parent = OpenBtn
 
     -- Toggle Window Display
@@ -468,7 +425,7 @@ function UI.BuildMobileUI()
         OpenBtn.Visible = false
     end)
 
-    -- Pulsing Neon Effect (Main UI Only)
+    -- Pulsing Neon Accent Effect
     task.spawn(function()
         local t = 0
         while task.wait(0.03) do
@@ -478,7 +435,6 @@ function UI.BuildMobileUI()
             
             MainNeonStroke.Color = currentTurquoise
             HeaderTitle.TextColor3 = currentTurquoise
-            MainBgPanel.BackgroundColor3 = Color3.fromRGB(10, 45, 50):Lerp(Color3.fromRGB(15, 60, 65), pulse)
         end
     end)
 
