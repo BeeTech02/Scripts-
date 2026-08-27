@@ -1,13 +1,13 @@
 -- ============================================================================
 -- XORQEN HUB — DIRECT LUA BUILDER (TURQUOISE OS 26 GLASS WIDGET EDITION)
 -- Target Game: Cheating During Testing [BETA] (Roblox)
--- Architecture: Dynamic Turquoise Theme + OS 26 Glass Floating Widgets
--- Version: 2.2.0-TurquoiseGlass
+-- Architecture: Dynamic Turquoise Theme + Floating Drag Bubble + OS 26 Glass
+-- Version: 2.4.0-TurquoiseSymbol
 -- ============================================================================
 
 local Core = {
     Config = {
-        Version = "2.2.0-TurquoiseGlass",
+        Version = "2.4.0-TurquoiseSymbol",
         Theme = {
             Turquoise = Color3.fromRGB(64, 224, 208),     -- Vibrant Turquoise Accent
             TurquoiseDark = Color3.fromRGB(15, 55, 60),    -- Tinted Dark Turquoise Glass
@@ -15,7 +15,7 @@ local Core = {
             Text = Color3.fromRGB(240, 255, 255),
             ToggleOff = Color3.fromRGB(20, 35, 40),
             ToggleOn = Color3.fromRGB(64, 224, 208),
-            CloseRed = Color3.fromRGB(255, 40, 70),
+            CloseRed = Color3.fromRGB(255, 60, 80),
             Warning = Color3.fromRGB(255, 170, 0),
             Danger = Color3.fromRGB(255, 50, 50)
         }
@@ -229,7 +229,7 @@ function Features.InitTeacherPatrols()
 end
 
 -- ============================================================================
--- OS 26 NEON GLASS UI ENGINE (TURQUOISE EDITION)
+-- OS 26 NEON GLASS UI ENGINE
 -- ============================================================================
 local UI = {}
 
@@ -343,73 +343,71 @@ function UI.BuildMobileUI()
     MainNeonStroke.Thickness = 2
     MainNeonStroke.Parent = MainBgPanel
 
-    -- Header Title Bar Widget (Preserved XORQEN HUB Header)
+    -- Header Title Bar Widget
     local Header = Instance.new("Frame")
     Header.Size = UDim2.new(1, -20, 0, 32)
     Header.Position = UDim2.new(0, 10, 0, 10)
     Header.BackgroundTransparency = 1
     Header.Parent = Main
 
+    -- XORQEN HUB TITLE WITH INTEGRATED "X" BRAND SYMBOL
     local HeaderTitle = Instance.new("TextLabel")
-    HeaderTitle.Text = "⚡ XORQEN HUB"
+    HeaderTitle.Text = "✖ XORQEN HUB"
     HeaderTitle.Font = Enum.Font.GothamBold
     HeaderTitle.TextSize = 14
     HeaderTitle.TextColor3 = Core.Config.Theme.Turquoise
     HeaderTitle.TextXAlignment = Enum.TextXAlignment.Left
     HeaderTitle.Position = UDim2.new(0, 4, 0, 0)
-    HeaderTitle.Size = UDim2.new(0.7, 0, 1, 0)
+    HeaderTitle.Size = UDim2.new(0.75, 0, 1, 0)
     HeaderTitle.BackgroundTransparency = 1
     HeaderTitle.Parent = Header
 
-    -- Red Close Widget Icon
+    -- PROPER NO-BOX CROSS BUTTON (Clean Circle)
     local CloseBtn = Instance.new("TextButton")
     CloseBtn.Name = "CloseButton"
-    CloseBtn.Text = "✕"
+    CloseBtn.Text = "×" -- Vector Style Cross
     CloseBtn.Font = Enum.Font.GothamBold
-    CloseBtn.TextSize = 13
+    CloseBtn.TextSize = 18
     CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     CloseBtn.BackgroundColor3 = Core.Config.Theme.CloseRed
-    CloseBtn.BackgroundTransparency = 0.2
-    CloseBtn.Size = UDim2.new(0, 28, 0, 28)
-    CloseBtn.Position = UDim2.new(1, -28, 0, 2)
+    CloseBtn.BackgroundTransparency = 0.1
     CloseBtn.BorderSizePixel = 0
+    CloseBtn.Size = UDim2.new(0, 24, 0, 24)
+    CloseBtn.Position = UDim2.new(1, -26, 0, 4)
     CloseBtn.Parent = Header
 
     local CloseCorner = Instance.new("UICorner")
-    CloseCorner.CornerRadius = UDim.new(1, 0)
+    CloseCorner.CornerRadius = UDim.new(1, 0) -- Perfect Circle
     CloseCorner.Parent = CloseBtn
 
-    local CloseStroke = Instance.new("UIStroke")
-    CloseStroke.Color = Core.Config.Theme.CloseRed
-    CloseStroke.Thickness = 1.5
-    CloseStroke.Parent = CloseBtn
-
-    -- Floating OS 26 Re-open Widget Badge
+    -- DRAGGABLE WIDGET BUBBLE WITH "X" SYMBOL (STATIC SOLID HUB NAME NO NEON EFFECT)
     local OpenBtn = Instance.new("TextButton")
     OpenBtn.Name = "OpenButton"
-    OpenBtn.Text = "⚡ XORQEN HUB"
+    OpenBtn.Text = "✖ XORQEN HUB"
     OpenBtn.Font = Enum.Font.GothamBold
-    OpenBtn.TextSize = 11
-    OpenBtn.TextColor3 = Core.Config.Theme.Turquoise
-    OpenBtn.BackgroundColor3 = Core.Config.Theme.TurquoiseDark
-    OpenBtn.BackgroundTransparency = 0.25
-    OpenBtn.Size = UDim2.new(0, 110, 0, 36)
-    OpenBtn.Position = UDim2.new(0.02, 0, 0.45, 0)
+    OpenBtn.TextSize = 12
+    OpenBtn.TextColor3 = Color3.fromRGB(255, 255, 255) -- Clean Solid White Text
+    OpenBtn.BackgroundColor3 = Color3.fromRGB(15, 35, 40)
+    OpenBtn.BackgroundTransparency = 0.2
+    OpenBtn.Size = UDim2.new(0, 135, 0, 38)
+    OpenBtn.Position = UDim2.new(0.05, 0, 0.2, 0)
     OpenBtn.Visible = false
     OpenBtn.Active = true
-    OpenBtn.Draggable = true
+    OpenBtn.Draggable = true -- Draggable Bubble
+    OpenBtn.BorderSizePixel = 0
     OpenBtn.Parent = ScreenGui
 
     local OpenCorner = Instance.new("UICorner")
-    OpenCorner.CornerRadius = UDim.new(0, 18)
+    OpenCorner.CornerRadius = UDim.new(0, 19) -- Pill Bubble Shape
     OpenCorner.Parent = OpenBtn
 
     local OpenStroke = Instance.new("UIStroke")
     OpenStroke.Color = Core.Config.Theme.Turquoise
-    OpenStroke.Thickness = 2
+    OpenStroke.Thickness = 1.5
+    OpenStroke.Transparency = 0.2
     OpenStroke.Parent = OpenBtn
 
-    -- Actions
+    -- Window Switch Events
     CloseBtn.MouseButton1Click:Connect(function()
         Main.Visible = false
         OpenBtn.Visible = true
@@ -420,7 +418,7 @@ function UI.BuildMobileUI()
         OpenBtn.Visible = false
     end)
 
-    -- Synchronized Turquoise Neon Pulsing Effect
+    -- Pulsing Neon Theme Loop (Restricted strictly to the main UI window)
     task.spawn(function()
         local t = 0
         while task.wait(0.03) do
@@ -429,7 +427,6 @@ function UI.BuildMobileUI()
             local currentTurquoise = Core.Config.Theme.Turquoise:Lerp(Core.Config.Theme.TurquoiseGlow, pulse)
             
             MainNeonStroke.Color = currentTurquoise
-            OpenStroke.Color = currentTurquoise
             HeaderTitle.TextColor3 = currentTurquoise
             MainBgPanel.BackgroundColor3 = Color3.fromRGB(10, 45, 50):Lerp(Color3.fromRGB(15, 60, 65), pulse)
         end
@@ -447,7 +444,7 @@ function UI.BuildMobileUI()
     layout.Padding = UDim.new(0, 6)
     layout.Parent = Container
 
-    -- 4 Clean OS 26 Floating Glass Widgets
+    -- 4 OS 26 Floating Glass Widgets
     UI.CreateToggleSwitchRow(Container, "Desk Snapping / Sitting", "DeskSnapping")
     UI.CreateToggleSwitchRow(Container, "Teacher Position Tracking", "TeacherPositionTracking")
     UI.CreateToggleSwitchRow(Container, "Anti Detect Engine", "AntiDetect")
@@ -465,7 +462,7 @@ function Core.Init()
     Features.InitDeskSnapping()
     Features.InitAntiDetect()
     Features.InitTeacherPatrols()
-    print("[XORQEN HUB] Turquoise Neon Glass Architecture Loaded Successfully.")
+    print("[XORQEN HUB] Loaded with 'X' Symbol Branding & Draggable Widget Bubble.")
 end
 
 Core.Init()
