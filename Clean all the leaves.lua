@@ -1,12 +1,12 @@
 -- ============================================================================
 -- VORYZEN HUB — CLEAN ALL THE LEAVES (ROBLOX)
--- Fixed Layout: Non-overlapping Header, Bold Hub Name, Visible Widgets
--- Version: 1.3.5-VoryzenPerfect
+-- Fixed Auto Sell Tap Logic & Safe Proximity Prompt Firing
+-- Version: 1.3.6-VoryzenSafeSell
 -- ============================================================================
 
 local Core = {
     Config = {
-        Version = "1.3.5-VoryzenPerfect",
+        Version = "1.3.6-VoryzenSafeSell",
         HubName = "VORYZEN HUB",
         GameName = "Clean All The Leaves",
         Theme = {
@@ -102,11 +102,17 @@ function Exploits.InitAutoSell()
         if not root then return end
 
         for _, obj in ipairs(Core.Services.Workspace:GetDescendants()) do
-            if obj:IsA("BasePart") and (obj.Name:lower():find("dumpster") or obj.Name:lower():find("sell") or obj.Name:lower():find("bin")) then
-                if (root.Position - obj.Position).Magnitude <= 15 then
-                    for _, prompt in ipairs(obj:GetDescendants()) do
-                        if prompt:IsA("ProximityPrompt") then
-                            fireproximityprompt(prompt)
+            if obj:IsA("BasePart") then
+                local nameLower = obj.Name:lower()
+                -- Target only dumpsters, sell areas, or bins specifically
+                if nameLower:find("dumpster") or nameLower:find("sell") or nameLower:find("bin") or nameLower:find("dispose") then
+                    if (root.Position - obj.Position).Magnitude <= 18 then
+                        for _, prompt in ipairs(obj:GetDescendants()) do
+                            if prompt:IsA("ProximityPrompt") then
+                                pcall(function()
+                                    fireproximityprompt(prompt)
+                                end)
+                            end
                         end
                     end
                 end
@@ -225,7 +231,7 @@ end
 
 function UI.BuildMobileUI()
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "VoryzenLeavesPerfectGui"
+    ScreenGui.Name = "VoryzenLeavesSafeGui"
     ScreenGui.ResetOnSpawn = false
 
     pcall(function() ScreenGui.Parent = Core.Services.CoreGui end)
@@ -262,7 +268,7 @@ function UI.BuildMobileUI()
     Header.ZIndex = 5
     Header.Parent = Main
 
-    -- Close Button (Locked to right edge safely)
+    -- Close Button
     local CloseBtn = Instance.new("TextButton")
     CloseBtn.Name = "CloseButton"
     CloseBtn.Text = "×"
@@ -280,7 +286,7 @@ function UI.BuildMobileUI()
     CloseCorner.CornerRadius = UDim.new(1, 0)
     CloseCorner.Parent = CloseBtn
 
-    -- Header Title (Bold Hub Name + Italic Game Name, safely bounded to prevent overlap)
+    -- Header Title (Bold Hub Name + Italic Game Name)
     local HeaderTitle = Instance.new("TextLabel")
     HeaderTitle.Text = string.format("<b>%s</b> — <i>%s</i>", Core.Config.HubName, Core.Config.GameName)
     HeaderTitle.RichText = true
@@ -325,7 +331,7 @@ function UI.BuildMobileUI()
         OpenBtn.Visible = false
     end)
 
-    -- Scrolling Frame Container (Ensures widgets never overlap header or overflow bounds)
+    -- Scrolling Frame Container
     local ScrollContainer = Instance.new("ScrollingFrame")
     ScrollContainer.Name = "FeaturesScrollContainer"
     ScrollContainer.Size = UDim2.new(1, -20, 1, -56)
