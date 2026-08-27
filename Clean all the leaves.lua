@@ -1,12 +1,12 @@
 -- ============================================================================
 -- VORYZEN HUB — CLEAN ALL THE LEAVES (ROBLOX)
--- Updated Header Format: HUB NAME — *Game Name*
--- Version: 1.3.3-VoryzenFormal
+-- Fixed Header Visibility Update: Expanded Text Boundary & Proper Padding
+-- Version: 1.3.4-VoryzenFixed
 -- ============================================================================
 
 local Core = {
     Config = {
-        Version = "1.3.3-VoryzenFormal",
+        Version = "1.3.4-VoryzenFixed",
         HubName = "VORYZEN HUB",
         GameName = "Clean All The Leaves",
         Theme = {
@@ -156,7 +156,7 @@ function Exploits.ToggleJumpPower(enabled)
 end
 
 -- ============================================================================
--- UI BUILDER (FORMAL FORMATTED HEADER)
+-- UI BUILDER (FULLY VISIBLE HEADER FIX)
 -- ============================================================================
 local UI = {}
 
@@ -225,7 +225,7 @@ end
 
 function UI.BuildMobileUI()
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "VoryzenLeavesFormalGui"
+    ScreenGui.Name = "VoryzenLeavesFixedGui"
     ScreenGui.ResetOnSpawn = false
 
     pcall(function() ScreenGui.Parent = Core.Services.CoreGui end)
@@ -262,21 +262,7 @@ function UI.BuildMobileUI()
     Header.ZIndex = 5
     Header.Parent = Main
 
-    -- Formatted Hub Name + Game Name Label (Guaranteed non-clipping width with RichText support)
-    local HeaderTitle = Instance.new("TextLabel")
-    HeaderTitle.Text = string.format("<b>%s</b> — <i>%s</i>", Core.Config.HubName, Core.Config.GameName)
-    HeaderTitle.RichText = true
-    HeaderTitle.Font = Enum.Font.Gotham
-    HeaderTitle.TextSize = 11
-    HeaderTitle.TextColor3 = Core.Config.Theme.TextDark
-    HeaderTitle.TextXAlignment = Enum.TextXAlignment.Left
-    HeaderTitle.Position = UDim2.new(0, 6, 0, 0)
-    HeaderTitle.Size = UDim2.new(0.72, 0, 1, 0)
-    HeaderTitle.BackgroundTransparency = 1
-    HeaderTitle.ZIndex = 5
-    HeaderTitle.Parent = Header
-
-    -- Close Button
+    -- Close Button (Placed first & anchored right so text never overlaps it)
     local CloseBtn = Instance.new("TextButton")
     CloseBtn.Name = "CloseButton"
     CloseBtn.Text = "×"
@@ -293,6 +279,20 @@ function UI.BuildMobileUI()
     local CloseCorner = Instance.new("UICorner")
     CloseCorner.CornerRadius = UDim.new(1, 0)
     CloseCorner.Parent = CloseBtn
+
+    -- Header Title (Expanded width to 82% to guarantee full game name visibility)
+    local HeaderTitle = Instance.new("TextLabel")
+    HeaderTitle.Text = string.format("<b>%s</b> — <i>%s</i>", Core.Config.HubName, Core.Config.GameName)
+    HeaderTitle.RichText = true
+    HeaderTitle.Font = Enum.Font.Gotham
+    HeaderTitle.TextSize = 10.5
+    HeaderTitle.TextColor3 = Core.Config.Theme.TextDark
+    HeaderTitle.TextXAlignment = Enum.TextXAlignment.Left
+    HeaderTitle.Position = UDim2.new(0, 4, 0, 0)
+    HeaderTitle.Size = UDim2.new(0.82, 0, 1, 0)
+    HeaderTitle.BackgroundTransparency = 1
+    HeaderTitle.ZIndex = 5
+    HeaderTitle.Parent = Header
 
     -- Master Floating Capsule Button Widget
     local OpenBtn = Instance.new("TextButton")
