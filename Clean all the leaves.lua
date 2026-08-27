@@ -1,12 +1,12 @@
-\-- ============================================================================
+-- ============================================================================
 -- VORYZEN HUB — CLEAN ALL THE LEAVES (ROBLOX)
--- Fixed Instant Proximity Prompt Auto-Sell Logic
--- Version: 1.3.7-VoryzenInstantSell
+-- Fixed Batch Auto-Collect & Instant Dumpster Sell
+-- Version: 1.3.8-VoryzenBatchFix
 -- ============================================================================
 
 local Core = {
     Config = {
-        Version = "1.3.7-VoryzenInstantSell",
+        Version = "1.3.8-VoryzenBatchFix",
         HubName = "VORYZEN HUB",
         GameName = "Clean All The Leaves",
         Theme = {
@@ -75,6 +75,7 @@ function Exploits.InitAutoCollect()
         local root = Adapter.GetRootPart()
         if not root then return end
 
+        -- Loops through all descendants to catch entire bundles/folders of leaves at once
         for _, obj in ipairs(Core.Services.Workspace:GetDescendants()) do
             if obj:IsA("BasePart") or obj:IsA("Model") then
                 local name = obj.Name:lower()
@@ -84,7 +85,7 @@ function Exploits.InitAutoCollect()
                         if Core.State.AutoCollect then
                             targetPart.CFrame = root.CFrame
                         elseif Core.State.RadiusCollect then
-                            if (root.Position - targetPart.Position).Magnitude <= 35 then
+                            if (root.Position - targetPart.Position).Magnitude <= 40 then
                                 targetPart.CFrame = root.CFrame
                             end
                         end
@@ -99,14 +100,12 @@ function Exploits.InitAutoSell()
     Core.Connections.AutoSell = Core.Services.RunService.Heartbeat:Connect(function()
         if not Core.State.AutoSell then return end
         
-        -- Search all ProximityPrompts in the workspace for selling leaves
         for _, obj in ipairs(Core.Services.Workspace:GetDescendants()) do
             if obj:IsA("ProximityPrompt") then
                 local actionText = obj.ActionText and obj.ActionText:lower() or ""
                 local objectText = obj.ObjectText and obj.ObjectText:lower() or ""
                 
-                if actionText:find("sell") or objectText:find("sell") or actionText:find("leave") or objectText:find("leave") then
-                    -- Temporarily zero out hold duration so it fires instantly like a tap
+                if actionText:find("sell") or objectText:find("sell") or actionText:find("leave") or objectText:find("leave") or actionText:find("dump") then
                     obj.HoldDuration = 0
                     pcall(function()
                         fireproximityprompt(obj)
@@ -227,7 +226,7 @@ end
 
 function UI.BuildMobileUI()
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "VoryzenLeavesInstantSellGui"
+    ScreenGui.Name = "VoryzenLeavesBatchGui"
     ScreenGui.ResetOnSpawn = false
 
     pcall(function() ScreenGui.Parent = Core.Services.CoreGui end)
