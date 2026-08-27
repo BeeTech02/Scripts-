@@ -1,12 +1,12 @@
 -- ============================================================================
 -- VORYZEN HUB — CLEAN ALL THE LEAVES (ROBLOX)
--- Amethyst Purple Glassmorphic Style + Leaf Collection Exploits
--- Version: 1.3.0-VoryzenLeaves
+-- Fixed Mobile UI & Responsive Scrolling Layout
+-- Version: 1.3.1-VoryzenFixed
 -- ============================================================================
 
 local Core = {
     Config = {
-        Version = "1.3.0-VoryzenLeaves",
+        Version = "1.3.1-VoryzenFixed",
         HubName = "VORYZEN HUB",
         Theme = {
             MainBg = Color3.fromRGB(155, 120, 195),          -- Amethyst Glass Panel
@@ -28,7 +28,6 @@ local Core = {
         AutoTools = false,
         AutoVent = false,
         SpinClass = false,
-        Fly = false,
         InfiniteJump = false,
         Noclip = false,
         SpeedBoost = false,
@@ -69,7 +68,6 @@ end
 
 local Exploits = {}
 
--- Auto Collect Leaves Logic
 function Exploits.InitAutoCollect()
     Core.Connections.AutoCollect = Core.Services.RunService.Heartbeat:Connect(function()
         if not Core.State.AutoCollect and not Core.State.RadiusCollect then return end
@@ -96,7 +94,6 @@ function Exploits.InitAutoCollect()
     end)
 end
 
--- Auto Sell Logic
 function Exploits.InitAutoSell()
     Core.Connections.AutoSell = Core.Services.RunService.Heartbeat:Connect(function()
         if not Core.State.AutoSell then return end
@@ -106,7 +103,6 @@ function Exploits.InitAutoSell()
         for _, obj in ipairs(Core.Services.Workspace:GetDescendants()) do
             if obj:IsA("BasePart") and (obj.Name:lower():find("dumpster") or obj.Name:lower():find("sell") or obj.Name:lower():find("bin")) then
                 if (root.Position - obj.Position).Magnitude <= 15 then
-                    -- Trigger interaction prompt if available
                     for _, prompt in ipairs(obj:GetDescendants()) do
                         if prompt:IsA("ProximityPrompt") then
                             fireproximityprompt(prompt)
@@ -159,7 +155,7 @@ function Exploits.ToggleJumpPower(enabled)
 end
 
 -- ============================================================================
--- UI BUILDER (VORYZEN HUB - AMETHYST THEME)
+-- UI BUILDER (FIXED LAYOUT)
 -- ============================================================================
 local UI = {}
 
@@ -184,11 +180,11 @@ function UI.CreateToggleSwitchRow(parent, labelText, stateKey, callback)
     local label = Instance.new("TextLabel")
     label.Text = labelText
     label.Font = Enum.Font.GothamBold
-    label.TextSize = 12
+    label.TextSize = 11
     label.TextColor3 = Core.Config.Theme.TextDark
     label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Position = UDim2.new(0, 14, 0, 0)
-    label.Size = UDim2.new(0.65, 0, 1, 0)
+    label.Position = UDim2.new(0, 12, 0, 0)
+    label.Size = UDim2.new(0.62, 0, 1, 0)
     label.BackgroundTransparency = 1
     label.Parent = card
 
@@ -228,24 +224,22 @@ end
 
 function UI.BuildMobileUI()
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "VoryzenLeavesGui"
+    ScreenGui.Name = "VoryzenLeavesFixedGui"
     ScreenGui.ResetOnSpawn = false
 
     pcall(function() ScreenGui.Parent = Core.Services.CoreGui end)
     if not ScreenGui.Parent then ScreenGui.Parent = Core.LocalPlayer:WaitForChild("PlayerGui") end
 
-    -- Main Panel Window
-    local Main = Instance.new("ScrollingFrame")
+    -- Main Window Panel
+    local Main = Instance.new("Frame")
     Main.Name = "MainWindow"
-    Main.Size = UDim2.new(0, 320, 0, 360)
-    Main.Position = UDim2.new(0.5, -160, 0.5, -180)
+    Main.Size = UDim2.new(0, 320, 0, 380)
+    Main.Position = UDim2.new(0.5, -160, 0.5, -190)
     Main.BackgroundColor3 = Core.Config.Theme.MainBg
     Main.BackgroundTransparency = Core.Config.Theme.MainBgTransparency
     Main.BorderSizePixel = 0
     Main.Active = true
     Main.Draggable = true
-    Main.CanvasSize = UDim2.new(0, 0, 0, 560)
-    Main.ScrollBarThickness = 4
     Main.Parent = ScreenGui
 
     local MainCorner = Instance.new("UICorner")
@@ -258,17 +252,17 @@ function UI.BuildMobileUI()
     MainStroke.Transparency = 0.2
     MainStroke.Parent = Main
 
-    -- Header Section (Fixed at top of screen structure via separate wrapper or overlay)
+    -- Header Section
     local Header = Instance.new("Frame")
     Header.Size = UDim2.new(1, -20, 0, 36)
-    Header.Position = UDim2.new(0, 10, 0, 10)
+    Header.Position = UDim2.new(0, 10, 0, 8)
     Header.BackgroundTransparency = 1
     Header.Parent = Main
 
     local HeaderTitle = Instance.new("TextLabel")
     HeaderTitle.Text = Core.Config.HubName .. " (Leaves)"
     HeaderTitle.Font = Enum.Font.GothamBold
-    HeaderTitle.TextSize = 14
+    HeaderTitle.TextSize = 13
     HeaderTitle.TextColor3 = Core.Config.Theme.TextDark
     HeaderTitle.TextXAlignment = Enum.TextXAlignment.Left
     HeaderTitle.Position = UDim2.new(0, 8, 0, 0)
@@ -276,7 +270,7 @@ function UI.BuildMobileUI()
     HeaderTitle.BackgroundTransparency = 1
     HeaderTitle.Parent = Header
 
-    -- Red Circular Close Button
+    -- Close Button
     local CloseBtn = Instance.new("TextButton")
     CloseBtn.Name = "CloseButton"
     CloseBtn.Text = "×"
@@ -293,7 +287,7 @@ function UI.BuildMobileUI()
     CloseCorner.CornerRadius = UDim.new(1, 0)
     CloseCorner.Parent = CloseBtn
 
-    -- Master Floating Capsule Button Widget (Amethyst)
+    -- Master Floating Capsule Button Widget
     local OpenBtn = Instance.new("TextButton")
     OpenBtn.Name = "OpenButton"
     OpenBtn.Text = Core.Config.HubName
@@ -324,29 +318,32 @@ function UI.BuildMobileUI()
         OpenBtn.Visible = false
     end)
 
-    -- Container for Toggles
-    local Container = Instance.new("Frame")
-    Container.Size = UDim2.new(1, -24, 1, -56)
-    Container.Position = UDim2.new(0, 12, 0, 52)
-    Container.BackgroundTransparency = 1
-    Container.Parent = Main
+    -- Scrolling Frame Container for All Options
+    local ScrollContainer = Instance.new("ScrollingFrame")
+    ScrollContainer.Size = UDim2.new(1, -20, 1, -52)
+    ScrollContainer.Position = UDim2.new(0, 10, 0, 46)
+    ScrollContainer.BackgroundTransparency = 1
+    ScrollContainer.BorderSizePixel = 0
+    ScrollContainer.CanvasSize = UDim2.new(0, 0, 0, 530)
+    ScrollContainer.ScrollBarThickness = 3
+    ScrollContainer.Parent = Main
 
     local layout = Instance.new("UIListLayout")
     layout.SortOrder = Enum.SortOrder.LayoutOrder
     layout.Padding = UDim.new(0, 6)
-    layout.Parent = Container
+    layout.Parent = ScrollContainer
 
-    UI.CreateToggleSwitchRow(Container, "Auto Collect Leaves", "AutoCollect")
-    UI.CreateToggleSwitchRow(Container, "Radius Auto Collect", "RadiusCollect")
-    UI.CreateToggleSwitchRow(Container, "Auto Sell to Dumpster", "AutoSell")
-    UI.CreateToggleSwitchRow(Container, "Auto Bag & Upgrades", "AutoUpgrades")
-    UI.CreateToggleSwitchRow(Container, "Auto Buy & Equip Tools", "AutoTools")
-    UI.CreateToggleSwitchRow(Container, "Auto Vent", "AutoVent")
-    UI.CreateToggleSwitchRow(Container, "Spin for Class", "SpinClass")
-    UI.CreateToggleSwitchRow(Container, "Infinite Jump", "InfiniteJump")
-    UI.CreateToggleSwitchRow(Container, "Noclip", "Noclip")
-    UI.CreateToggleSwitchRow(Container, "Speed Boost (32 WS)", "SpeedBoost", Exploits.ToggleSpeed)
-    UI.CreateToggleSwitchRow(Container, "Super Jump Power", "JumpPowerBoost", Exploits.ToggleJumpPower)
+    UI.CreateToggleSwitchRow(ScrollContainer, "Auto Collect Leaves", "AutoCollect")
+    UI.CreateToggleSwitchRow(ScrollContainer, "Radius Auto Collect", "RadiusCollect")
+    UI.CreateToggleSwitchRow(ScrollContainer, "Auto Sell to Dumpster", "AutoSell")
+    UI.CreateToggleSwitchRow(ScrollContainer, "Auto Bag & Upgrades", "AutoUpgrades")
+    UI.CreateToggleSwitchRow(ScrollContainer, "Auto Buy & Equip Tools", "AutoTools")
+    UI.CreateToggleSwitchRow(ScrollContainer, "Auto Vent", "AutoVent")
+    UI.CreateToggleSwitchRow(ScrollContainer, "Spin for Class", "SpinClass")
+    UI.CreateToggleSwitchRow(ScrollContainer, "Infinite Jump", "InfiniteJump")
+    UI.CreateToggleSwitchRow(ScrollContainer, "Noclip", "Noclip")
+    UI.CreateToggleSwitchRow(ScrollContainer, "Speed Boost (32 WS)", "SpeedBoost", Exploits.ToggleSpeed)
+    UI.CreateToggleSwitchRow(ScrollContainer, "Super Jump Power", "JumpPowerBoost", Exploits.ToggleJumpPower)
 
     return ScreenGui
 end
@@ -360,7 +357,7 @@ function Core.Init()
     Exploits.InitAutoSell()
     Exploits.InitInfiniteJump()
     Exploits.InitNoclip()
-    print("[" .. Core.Config.HubName .. "] Clean All The Leaves Edition Loaded.")
+    print("[" .. Core.Config.HubName .. "] Fixed Leaf Hub Loaded Successfully.")
 end
 
 Core.Init()
