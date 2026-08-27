@@ -1,18 +1,19 @@
 -- ============================================================================
 -- XORQEN HUB — BUMPY FLIGHT (ROBLOX)
--- Theme: Official XORQEN HUB Mint/Teal UI
--- Version: 1.0.6-XorqenOfficialUI
+-- Theme: Official XORQEN HUB Mint/Teal UI with Turquoise Floating Text
+-- Version: 1.0.7-XorqenOfficialUI
 -- ============================================================================
 
 local Core = {
     Config = {
-        Version = "1.0.6-XorqenOfficialUI",
+        Version = "1.0.7-XorqenOfficialUI",
         HubName = "XORQEN HUB",
         Theme = {
             MainBg = Color3.fromRGB(162, 230, 225),          -- Bright Mint/Turquoise Panel
             CardBg = Color3.fromRGB(188, 242, 238),          -- Inner Card Mint Fill
             TealBorder = Color3.fromRGB(14, 150, 150),        -- Sharp Dark Teal Outline
             TextDark = Color3.fromRGB(15, 25, 28),            -- High-Contrast Dark Text
+            WidgetTextTeal = Color3.fromRGB(14, 150, 150),     -- Turquoise Floating Button Text
             ToggleOn = Color3.fromRGB(0, 185, 185),           -- Solid Cyan/Teal Active Switch
             ToggleOff = Color3.fromRGB(160, 180, 180),         -- Grey Inactive Switch Fill
             CloseRed = Color3.fromRGB(255, 75, 90),           -- Red Circular Close Button
@@ -283,7 +284,7 @@ function Features.InitAutoEquipEmergency()
 end
 
 -- ============================================================================
--- UI BUILDER (EXACT XORQEN HUB BLUEPRINT MATCH)
+-- UI BUILDER (EXACT XORQEN HUB BLUEPRINT)
 -- ============================================================================
 local UI = {}
 
@@ -410,14 +411,14 @@ function UI.BuildMobileUI()
     CloseCorner.CornerRadius = UDim.new(1, 0)
     CloseCorner.Parent = CloseBtn
 
-    -- Floating Open/Minimize Button
+    -- Floating Open Widget Button
     local OpenBtn = Instance.new("TextButton")
     OpenBtn.Name = "OpenButton"
     OpenBtn.Text = Core.Config.HubName
     OpenBtn.Font = Enum.Font.GothamBold
-    OpenBtn.TextSize = 12
-    OpenBtn.TextColor3 = Core.Config.Theme.TextDark
-    OpenBtn.Size = UDim2.new(0, 130, 0, 38)
+    OpenBtn.TextSize = 13
+    OpenBtn.TextColor3 = Core.Config.Theme.WidgetTextTeal
+    OpenBtn.Size = UDim2.new(0, 140, 0, 40)
     OpenBtn.Position = UDim2.new(0.05, 0, 0.2, 0)
     OpenBtn.Visible = false
     OpenBtn.Active = true
