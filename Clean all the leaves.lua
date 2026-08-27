@@ -1,0 +1,366 @@
+-- ============================================================================
+-- VORYZEN HUB — CLEAN ALL THE LEAVES (ROBLOX)
+-- Amethyst Purple Glassmorphic Style + Leaf Collection Exploits
+-- Version: 1.3.0-VoryzenLeaves
+-- ============================================================================
+
+local Core = {
+    Config = {
+        Version = "1.3.0-VoryzenLeaves",
+        HubName = "VORYZEN HUB",
+        Theme = {
+            MainBg = Color3.fromRGB(155, 120, 195),          -- Amethyst Glass Panel
+            MainBgTransparency = 0.25,                        -- Semi-transparent glass fill
+            CardBg = Color3.fromRGB(220, 205, 240),          -- Soft Lavender Inner Card
+            CardBgTransparency = 0.35,                        -- Inner Card transparency
+            AmethystBorder = Color3.fromRGB(120, 80, 170),    -- Deep Violet Outline Accent
+            TextDark = Color3.fromRGB(30, 20, 45),            -- Dark Amethyst/Slate Text
+            ToggleOn = Color3.fromRGB(140, 80, 210),           -- Vivid Amethyst Active Switch
+            ToggleOff = Color3.fromRGB(185, 175, 200),         -- Greyish Lavender Inactive Switch
+            CloseRed = Color3.fromRGB(255, 85, 100)           -- Red Circular Close Button
+        }
+    },
+    State = {
+        AutoCollect = false,
+        RadiusCollect = false,
+        AutoSell = false,
+        AutoUpgrades = false,
+        AutoTools = false,
+        AutoVent = false,
+        SpinClass = false,
+        Fly = false,
+        InfiniteJump = false,
+        Noclip = false,
+        SpeedBoost = false,
+        JumpPowerBoost = false
+    },
+    Services = {
+        Players = game:GetService("Players"),
+        RunService = game:GetService("RunService"),
+        Workspace = game:GetService("Workspace"),
+        CoreGui = game:GetService("CoreGui"),
+        UserInputService = game:GetService("UserInputService")
+    },
+    Connections = {}
+}
+
+Core.LocalPlayer = Core.Services.Players.LocalPlayer
+
+-- ============================================================================
+-- GAME ADAPTER & EXPLOIT FUNCTIONS
+-- ============================================================================
+local Adapter = {}
+
+function Adapter.GetCharacter(player)
+    player = player or Core.LocalPlayer
+    return player and player.Character
+end
+
+function Adapter.GetRootPart(player)
+    local char = Adapter.GetCharacter(player)
+    if not char then return nil end
+    return char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("Head") or char.PrimaryPart
+end
+
+function Adapter.GetHumanoid(player)
+    local char = Adapter.GetCharacter(player)
+    return char and char:FindFirstChildOfClass("Humanoid")
+end
+
+local Exploits = {}
+
+-- Auto Collect Leaves Logic
+function Exploits.InitAutoCollect()
+    Core.Connections.AutoCollect = Core.Services.RunService.Heartbeat:Connect(function()
+        if not Core.State.AutoCollect and not Core.State.RadiusCollect then return end
+        local root = Adapter.GetRootPart()
+        if not root then return end
+
+        for _, obj in ipairs(Core.Services.Workspace:GetDescendants()) do
+            if obj:IsA("BasePart") or obj:IsA("Model") then
+                local name = obj.Name:lower()
+                if name:find("leaf") or name:find("leaves") then
+                    local targetPart = obj:IsA("Model") and (obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")) or obj
+                    if targetPart then
+                        if Core.State.AutoCollect then
+                            targetPart.CFrame = root.CFrame
+                        elseif Core.State.RadiusCollect then
+                            if (root.Position - targetPart.Position).Magnitude <= 35 then
+                                targetPart.CFrame = root.CFrame
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end)
+end
+
+-- Auto Sell Logic
+function Exploits.InitAutoSell()
+    Core.Connections.AutoSell = Core.Services.RunService.Heartbeat:Connect(function()
+        if not Core.State.AutoSell then return end
+        local root = Adapter.GetRootPart()
+        if not root then return end
+
+        for _, obj in ipairs(Core.Services.Workspace:GetDescendants()) do
+            if obj:IsA("BasePart") and (obj.Name:lower():find("dumpster") or obj.Name:lower():find("sell") or obj.Name:lower():find("bin")) then
+                if (root.Position - obj.Position).Magnitude <= 15 then
+                    -- Trigger interaction prompt if available
+                    for _, prompt in ipairs(obj:GetDescendants()) do
+                        if prompt:IsA("ProximityPrompt") then
+                            fireproximityprompt(prompt)
+                        end
+                    end
+                end
+            end
+        end
+    end)
+end
+
+function Exploits.InitInfiniteJump()
+    Core.Connections.InfJump = Core.Services.UserInputService.JumpRequest:Connect(function()
+        if Core.State.InfiniteJump then
+            local hum = Adapter.GetHumanoid()
+            if hum then
+                hum:ChangeState(Enum.HumanoidStateType.Jumping)
+            end
+        end
+    end)
+end
+
+function Exploits.InitNoclip()
+    Core.Connections.Noclip = Core.Services.RunService.Stepped:Connect(function()
+        if not Core.State.Noclip then return end
+        local char = Adapter.GetCharacter()
+        if char then
+            for _, part in ipairs(char:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
+        end
+    end)
+end
+
+function Exploits.ToggleSpeed(enabled)
+    local hum = Adapter.GetHumanoid()
+    if hum then
+        hum.WalkSpeed = enabled and 32 or 16
+    end
+end
+
+function Exploits.ToggleJumpPower(enabled)
+    local hum = Adapter.GetHumanoid()
+    if hum then
+        hum.UseJumpPower = true
+        hum.JumpPower = enabled and 100 or 50
+    end
+end
+
+-- ============================================================================
+-- UI BUILDER (VORYZEN HUB - AMETHYST THEME)
+-- ============================================================================
+local UI = {}
+
+function UI.CreateToggleSwitchRow(parent, labelText, stateKey, callback)
+    local card = Instance.new("Frame")
+    card.Size = UDim2.new(1, 0, 0, 42)
+    card.BackgroundColor3 = Core.Config.Theme.CardBg
+    card.BackgroundTransparency = Core.Config.Theme.CardBgTransparency
+    card.BorderSizePixel = 0
+    card.Parent = parent
+
+    local cardCorner = Instance.new("UICorner")
+    cardCorner.CornerRadius = UDim.new(0, 14)
+    cardCorner.Parent = card
+
+    local cardStroke = Instance.new("UIStroke")
+    cardStroke.Color = Core.Config.Theme.AmethystBorder
+    cardStroke.Thickness = 1.2
+    cardStroke.Transparency = 0.3
+    cardStroke.Parent = card
+
+    local label = Instance.new("TextLabel")
+    label.Text = labelText
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = 12
+    label.TextColor3 = Core.Config.Theme.TextDark
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Position = UDim2.new(0, 14, 0, 0)
+    label.Size = UDim2.new(0.65, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Parent = card
+
+    local switchBg = Instance.new("TextButton")
+    switchBg.Text = ""
+    switchBg.Size = UDim2.new(0, 48, 0, 24)
+    switchBg.Position = UDim2.new(1, -56, 0.5, -12)
+    switchBg.BackgroundColor3 = Core.State[stateKey] and Core.Config.Theme.ToggleOn or Core.Config.Theme.ToggleOff
+    switchBg.BorderSizePixel = 0
+    switchBg.Parent = card
+
+    local switchCorner = Instance.new("UICorner")
+    switchCorner.CornerRadius = UDim.new(1, 0)
+    switchCorner.Parent = switchBg
+
+    local knob = Instance.new("Frame")
+    knob.Size = UDim2.new(0, 20, 0, 20)
+    knob.Position = Core.State[stateKey] and UDim2.new(1, -22, 0.5, -10) or UDim2.new(0, 2, 0.5, -10)
+    knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    knob.BorderSizePixel = 0
+    knob.Parent = switchBg
+
+    local knobCorner = Instance.new("UICorner")
+    knobCorner.CornerRadius = UDim.new(1, 0)
+    knobCorner.Parent = knob
+
+    switchBg.MouseButton1Click:Connect(function()
+        Core.State[stateKey] = not Core.State[stateKey]
+        local active = Core.State[stateKey]
+        switchBg.BackgroundColor3 = active and Core.Config.Theme.ToggleOn or Core.Config.Theme.ToggleOff
+        knob.Position = active and UDim2.new(1, -22, 0.5, -10) or UDim2.new(0, 2, 0.5, -10)
+        if callback then callback(active) end
+    end)
+
+    return card
+end
+
+function UI.BuildMobileUI()
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Name = "VoryzenLeavesGui"
+    ScreenGui.ResetOnSpawn = false
+
+    pcall(function() ScreenGui.Parent = Core.Services.CoreGui end)
+    if not ScreenGui.Parent then ScreenGui.Parent = Core.LocalPlayer:WaitForChild("PlayerGui") end
+
+    -- Main Panel Window
+    local Main = Instance.new("ScrollingFrame")
+    Main.Name = "MainWindow"
+    Main.Size = UDim2.new(0, 320, 0, 360)
+    Main.Position = UDim2.new(0.5, -160, 0.5, -180)
+    Main.BackgroundColor3 = Core.Config.Theme.MainBg
+    Main.BackgroundTransparency = Core.Config.Theme.MainBgTransparency
+    Main.BorderSizePixel = 0
+    Main.Active = true
+    Main.Draggable = true
+    Main.CanvasSize = UDim2.new(0, 0, 0, 560)
+    Main.ScrollBarThickness = 4
+    Main.Parent = ScreenGui
+
+    local MainCorner = Instance.new("UICorner")
+    MainCorner.CornerRadius = UDim.new(0, 22)
+    MainCorner.Parent = Main
+
+    local MainStroke = Instance.new("UIStroke")
+    MainStroke.Color = Core.Config.Theme.AmethystBorder
+    MainStroke.Thickness = 1.5
+    MainStroke.Transparency = 0.2
+    MainStroke.Parent = Main
+
+    -- Header Section (Fixed at top of screen structure via separate wrapper or overlay)
+    local Header = Instance.new("Frame")
+    Header.Size = UDim2.new(1, -20, 0, 36)
+    Header.Position = UDim2.new(0, 10, 0, 10)
+    Header.BackgroundTransparency = 1
+    Header.Parent = Main
+
+    local HeaderTitle = Instance.new("TextLabel")
+    HeaderTitle.Text = Core.Config.HubName .. " (Leaves)"
+    HeaderTitle.Font = Enum.Font.GothamBold
+    HeaderTitle.TextSize = 14
+    HeaderTitle.TextColor3 = Core.Config.Theme.TextDark
+    HeaderTitle.TextXAlignment = Enum.TextXAlignment.Left
+    HeaderTitle.Position = UDim2.new(0, 8, 0, 0)
+    HeaderTitle.Size = UDim2.new(0.7, 0, 1, 0)
+    HeaderTitle.BackgroundTransparency = 1
+    HeaderTitle.Parent = Header
+
+    -- Red Circular Close Button
+    local CloseBtn = Instance.new("TextButton")
+    CloseBtn.Name = "CloseButton"
+    CloseBtn.Text = "×"
+    CloseBtn.Font = Enum.Font.GothamBold
+    CloseBtn.TextSize = 18
+    CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CloseBtn.BackgroundColor3 = Core.Config.Theme.CloseRed
+    CloseBtn.BorderSizePixel = 0
+    CloseBtn.Size = UDim2.new(0, 26, 0, 26)
+    CloseBtn.Position = UDim2.new(1, -26, 0.5, -13)
+    CloseBtn.Parent = Header
+
+    local CloseCorner = Instance.new("UICorner")
+    CloseCorner.CornerRadius = UDim.new(1, 0)
+    CloseCorner.Parent = CloseBtn
+
+    -- Master Floating Capsule Button Widget (Amethyst)
+    local OpenBtn = Instance.new("TextButton")
+    OpenBtn.Name = "OpenButton"
+    OpenBtn.Text = Core.Config.HubName
+    OpenBtn.Font = Enum.Font.GothamBold
+    OpenBtn.TextSize = 13
+    OpenBtn.TextColor3 = Core.Config.Theme.TextDark
+    OpenBtn.Size = UDim2.new(0, 160, 0, 42)
+    OpenBtn.Position = UDim2.new(0.05, 0, 0.15, 0)
+    OpenBtn.Visible = false
+    OpenBtn.Active = true
+    OpenBtn.Draggable = true
+    OpenBtn.BackgroundColor3 = Core.Config.Theme.MainBg
+    OpenBtn.BackgroundTransparency = Core.Config.Theme.MainBgTransparency
+    OpenBtn.BorderSizePixel = 0
+    OpenBtn.Parent = ScreenGui
+
+    local OpenCorner = Instance.new("UICorner")
+    OpenCorner.CornerRadius = UDim.new(1, 0)
+    OpenCorner.Parent = OpenBtn
+
+    CloseBtn.MouseButton1Click:Connect(function()
+        Main.Visible = false
+        OpenBtn.Visible = true
+    end)
+
+    OpenBtn.MouseButton1Click:Connect(function()
+        Main.Visible = true
+        OpenBtn.Visible = false
+    end)
+
+    -- Container for Toggles
+    local Container = Instance.new("Frame")
+    Container.Size = UDim2.new(1, -24, 1, -56)
+    Container.Position = UDim2.new(0, 12, 0, 52)
+    Container.BackgroundTransparency = 1
+    Container.Parent = Main
+
+    local layout = Instance.new("UIListLayout")
+    layout.SortOrder = Enum.SortOrder.LayoutOrder
+    layout.Padding = UDim.new(0, 6)
+    layout.Parent = Container
+
+    UI.CreateToggleSwitchRow(Container, "Auto Collect Leaves", "AutoCollect")
+    UI.CreateToggleSwitchRow(Container, "Radius Auto Collect", "RadiusCollect")
+    UI.CreateToggleSwitchRow(Container, "Auto Sell to Dumpster", "AutoSell")
+    UI.CreateToggleSwitchRow(Container, "Auto Bag & Upgrades", "AutoUpgrades")
+    UI.CreateToggleSwitchRow(Container, "Auto Buy & Equip Tools", "AutoTools")
+    UI.CreateToggleSwitchRow(Container, "Auto Vent", "AutoVent")
+    UI.CreateToggleSwitchRow(Container, "Spin for Class", "SpinClass")
+    UI.CreateToggleSwitchRow(Container, "Infinite Jump", "InfiniteJump")
+    UI.CreateToggleSwitchRow(Container, "Noclip", "Noclip")
+    UI.CreateToggleSwitchRow(Container, "Speed Boost (32 WS)", "SpeedBoost", Exploits.ToggleSpeed)
+    UI.CreateToggleSwitchRow(Container, "Super Jump Power", "JumpPowerBoost", Exploits.ToggleJumpPower)
+
+    return ScreenGui
+end
+
+-- ============================================================================
+-- INITIALIZATION
+-- ============================================================================
+function Core.Init()
+    UI.BuildMobileUI()
+    Exploits.InitAutoCollect()
+    Exploits.InitAutoSell()
+    Exploits.InitInfiniteJump()
+    Exploits.InitNoclip()
+    print("[" .. Core.Config.HubName .. "] Clean All The Leaves Edition Loaded.")
+end
+
+Core.Init()
