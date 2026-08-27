@@ -1,20 +1,22 @@
 -- ============================================================================
--- XORQEN HUB — DIRECT LUA BUILDER (TURQUOISE OS 26 GLASS WIDGET EDITION)
--- Target Game: Cheating During Testing [BETA] (Roblox)
--- Architecture: Dynamic Turquoise Theme + Profile Image Badge + OS 26 Glass
--- Version: 2.5.0-ProfileImage
+-- XORQEN HUB CONFIGURATION & SOURCE CODE
+-- Name: XORQEN HUB
+-- Theme: Turquoise Cyber Glow
+-- Identity Icon: Custom X-Circuit Profile Image
 -- ============================================================================
 
 local Core = {
     Config = {
-        Version = "2.5.0-ProfileImage",
+        Version = "2.6.0-XorqenIdentity",
+        HubName = "XORQEN HUB",
+        -- Replace '1234567890' below with your uploaded Roblox Decal/Asset ID:
+        HubAssetId = "rbxassetid://1234567890", 
         Theme = {
-            Turquoise = Color3.fromRGB(64, 224, 208),     -- Vibrant Turquoise Accent
-            TurquoiseDark = Color3.fromRGB(15, 55, 60),    -- Tinted Dark Turquoise Glass
-            TurquoiseGlow = Color3.fromRGB(0, 245, 212),    -- Bright Neon Turquoise Pulse
+            Turquoise = Color3.fromRGB(64, 224, 208),     -- Main Accent Color
+            TurquoiseDark = Color3.fromRGB(15, 55, 60),    -- Background Tint
+            TurquoiseGlow = Color3.fromRGB(0, 245, 212),    -- Glow Pulse Color
             Text = Color3.fromRGB(240, 255, 255),
             ToggleOff = Color3.fromRGB(20, 35, 40),
-            ToggleOn = Color3.fromRGB(64, 224, 208),
             CloseRed = Color3.fromRGB(255, 60, 80),
             Warning = Color3.fromRGB(255, 170, 0),
             Danger = Color3.fromRGB(255, 50, 50)
@@ -229,7 +231,7 @@ function Features.InitTeacherPatrols()
 end
 
 -- ============================================================================
--- OS 26 NEON GLASS UI ENGINE
+-- UI BUILDER
 -- ============================================================================
 local UI = {}
 
@@ -239,7 +241,6 @@ function UI.CreateToggleSwitchRow(parent, labelText, stateKey)
     widgetCard.BackgroundTransparency = 1
     widgetCard.Parent = parent
 
-    -- OS 26 Floating Glass Container
     local glassBg = Instance.new("Frame")
     glassBg.Size = UDim2.new(1, 0, 1, 0)
     glassBg.BackgroundColor3 = Color3.fromRGB(10, 30, 35)
@@ -267,7 +268,6 @@ function UI.CreateToggleSwitchRow(parent, labelText, stateKey)
     label.BackgroundTransparency = 1
     label.Parent = widgetCard
 
-    -- Turquoise Toggle Switch Button
     local switchBg = Instance.new("TextButton")
     switchBg.Text = ""
     switchBg.Size = UDim2.new(0, 46, 0, 22)
@@ -311,13 +311,13 @@ end
 
 function UI.BuildMobileUI()
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "XorqenHubTurquoise"
+    ScreenGui.Name = "XorqenHubGui"
     ScreenGui.ResetOnSpawn = false
 
     pcall(function() ScreenGui.Parent = Core.Services.CoreGui end)
     if not ScreenGui.Parent then ScreenGui.Parent = Core.LocalPlayer:WaitForChild("PlayerGui") end
 
-    -- Main Container Window
+    -- Main UI Container
     local Main = Instance.new("Frame")
     Main.Name = "MainWindow"
     Main.Size = UDim2.new(0, 310, 0, 260)
@@ -327,7 +327,6 @@ function UI.BuildMobileUI()
     Main.Draggable = true
     Main.Parent = ScreenGui
 
-    -- Turquoise Glass Main Background Panel
     local MainBgPanel = Instance.new("Frame")
     MainBgPanel.Size = UDim2.new(1, 0, 1, 0)
     MainBgPanel.BackgroundColor3 = Core.Config.Theme.TurquoiseDark
@@ -343,42 +342,42 @@ function UI.BuildMobileUI()
     MainNeonStroke.Thickness = 2
     MainNeonStroke.Parent = MainBgPanel
 
-    -- Header Title Bar Widget
+    -- Header Panel
     local Header = Instance.new("Frame")
     Header.Size = UDim2.new(1, -20, 0, 32)
     Header.Position = UDim2.new(0, 10, 0, 10)
     Header.BackgroundTransparency = 1
     Header.Parent = Main
 
-    -- HEADER PROFILE IMAGE ICON
+    -- Identity Profile Image Badge
     local HeaderIcon = Instance.new("ImageLabel")
     HeaderIcon.Name = "HubIcon"
-    HeaderIcon.Size = UDim2.new(0, 22, 0, 22)
-    HeaderIcon.Position = UDim2.new(0, 2, 0.5, -11)
+    HeaderIcon.Size = UDim2.new(0, 24, 0, 24)
+    HeaderIcon.Position = UDim2.new(0, 0, 0.5, -12)
     HeaderIcon.BackgroundTransparency = 1
-    HeaderIcon.Image = "rbxassetid://0" -- Replace with your uploaded image asset ID
+    HeaderIcon.Image = Core.Config.HubAssetId
     HeaderIcon.Parent = Header
 
     local HeaderIconCorner = Instance.new("UICorner")
     HeaderIconCorner.CornerRadius = UDim.new(0, 6)
     HeaderIconCorner.Parent = HeaderIcon
 
-    -- XORQEN HUB TITLE (Symbol Removed)
+    -- Hub Title
     local HeaderTitle = Instance.new("TextLabel")
-    HeaderTitle.Text = "XORQEN HUB"
+    HeaderTitle.Text = Core.Config.HubName
     HeaderTitle.Font = Enum.Font.GothamBold
     HeaderTitle.TextSize = 13
     HeaderTitle.TextColor3 = Core.Config.Theme.Turquoise
     HeaderTitle.TextXAlignment = Enum.TextXAlignment.Left
-    HeaderTitle.Position = UDim2.new(0, 30, 0, 0)
+    HeaderTitle.Position = UDim2.new(0, 32, 0, 0)
     HeaderTitle.Size = UDim2.new(0.65, 0, 1, 0)
     HeaderTitle.BackgroundTransparency = 1
     HeaderTitle.Parent = Header
 
-    -- PROPER NO-BOX CROSS BUTTON (Clean Circle)
+    -- Close Button
     local CloseBtn = Instance.new("TextButton")
     CloseBtn.Name = "CloseButton"
-    CloseBtn.Text = "×" -- Vector Style Cross
+    CloseBtn.Text = "×"
     CloseBtn.Font = Enum.Font.GothamBold
     CloseBtn.TextSize = 18
     CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -390,10 +389,10 @@ function UI.BuildMobileUI()
     CloseBtn.Parent = Header
 
     local CloseCorner = Instance.new("UICorner")
-    CloseCorner.CornerRadius = UDim.new(1, 0) -- Perfect Circle
+    CloseCorner.CornerRadius = UDim.new(1, 0)
     CloseCorner.Parent = CloseBtn
 
-    -- DRAGGABLE WIDGET BUBBLE WITH PROFILE IMAGE ICON (STATIC SOLID HUB NAME NO NEON EFFECT)
+    -- Draggable Floating Widget Bubble
     local OpenBtn = Instance.new("TextButton")
     OpenBtn.Name = "OpenButton"
     OpenBtn.Text = ""
@@ -401,14 +400,14 @@ function UI.BuildMobileUI()
     OpenBtn.Position = UDim2.new(0.05, 0, 0.2, 0)
     OpenBtn.Visible = false
     OpenBtn.Active = true
-    OpenBtn.Draggable = true -- Draggable Bubble
+    OpenBtn.Draggable = true
     OpenBtn.BackgroundColor3 = Color3.fromRGB(15, 35, 40)
     OpenBtn.BackgroundTransparency = 0.2
     OpenBtn.BorderSizePixel = 0
     OpenBtn.Parent = ScreenGui
 
     local OpenCorner = Instance.new("UICorner")
-    OpenCorner.CornerRadius = UDim.new(0, 19) -- Pill Bubble Shape
+    OpenCorner.CornerRadius = UDim.new(0, 19)
     OpenCorner.Parent = OpenBtn
 
     local OpenStroke = Instance.new("UIStroke")
@@ -417,32 +416,32 @@ function UI.BuildMobileUI()
     OpenStroke.Transparency = 0.2
     OpenStroke.Parent = OpenBtn
 
-    -- WIDGET BUBBLE PROFILE IMAGE ICON
+    -- Widget Bubble Image Badge
     local OpenIcon = Instance.new("ImageLabel")
     OpenIcon.Name = "HubIcon"
     OpenIcon.Size = UDim2.new(0, 24, 0, 24)
     OpenIcon.Position = UDim2.new(0, 8, 0.5, -12)
     OpenIcon.BackgroundTransparency = 1
-    OpenIcon.Image = "rbxassetid://0" -- Replace with your uploaded image asset ID
+    OpenIcon.Image = Core.Config.HubAssetId
     OpenIcon.Parent = OpenBtn
 
     local OpenIconCorner = Instance.new("UICorner")
     OpenIconCorner.CornerRadius = UDim.new(0, 6)
     OpenIconCorner.Parent = OpenIcon
 
-    -- WIDGET BUBBLE TITLE TEXT
+    -- Widget Bubble Title
     local OpenText = Instance.new("TextLabel")
-    OpenText.Text = "XORQEN HUB"
+    OpenText.Text = Core.Config.HubName
     OpenText.Font = Enum.Font.GothamBold
     OpenText.TextSize = 11
-    OpenText.TextColor3 = Color3.fromRGB(255, 255, 255) -- Clean Solid White Text
+    OpenText.TextColor3 = Color3.fromRGB(255, 255, 255)
     OpenText.TextXAlignment = Enum.TextXAlignment.Left
     OpenText.Position = UDim2.new(0, 38, 0, 0)
     OpenText.Size = UDim2.new(1, -38, 1, 0)
     OpenText.BackgroundTransparency = 1
     OpenText.Parent = OpenBtn
 
-    -- Window Switch Events
+    -- Toggle Window Display
     CloseBtn.MouseButton1Click:Connect(function()
         Main.Visible = false
         OpenBtn.Visible = true
@@ -453,7 +452,7 @@ function UI.BuildMobileUI()
         OpenBtn.Visible = false
     end)
 
-    -- Pulsing Neon Theme Loop (Restricted strictly to the main UI window)
+    -- Pulsing Neon Effect (Main UI Only)
     task.spawn(function()
         local t = 0
         while task.wait(0.03) do
@@ -467,7 +466,7 @@ function UI.BuildMobileUI()
         end
     end)
 
-    -- Widget Rows Holder Container
+    -- Container for Toggles
     local Container = Instance.new("Frame")
     Container.Size = UDim2.new(1, -20, 1, -54)
     Container.Position = UDim2.new(0, 10, 0, 48)
@@ -479,7 +478,6 @@ function UI.BuildMobileUI()
     layout.Padding = UDim.new(0, 6)
     layout.Parent = Container
 
-    -- 4 OS 26 Floating Glass Widgets
     UI.CreateToggleSwitchRow(Container, "Desk Snapping / Sitting", "DeskSnapping")
     UI.CreateToggleSwitchRow(Container, "Teacher Position Tracking", "TeacherPositionTracking")
     UI.CreateToggleSwitchRow(Container, "Anti Detect Engine", "AntiDetect")
@@ -497,7 +495,7 @@ function Core.Init()
     Features.InitDeskSnapping()
     Features.InitAntiDetect()
     Features.InitTeacherPatrols()
-    print("[XORQEN HUB] Loaded with Profile Image & Clean UI Layout.")
+    print("[" .. Core.Config.HubName .. "] Loaded successfully.")
 end
 
 Core.Init()
