@@ -2,15 +2,15 @@
 -- XORQEN HUB CONFIGURATION & SOURCE CODE
 -- Name: XORQEN HUB
 -- Theme: Turquoise Cyber Glow
--- Identity Icon: Custom X-Circuit Profile Image
+-- Identity Icon: Aligned Left Profile Image Badge
 -- ============================================================================
 
 local Core = {
     Config = {
-        Version = "2.6.0-XorqenIdentity",
+        Version = "2.7.0-IconVisibilityFix",
         HubName = "XORQEN HUB",
-        -- Replace '1234567890' below with your uploaded Roblox Decal/Asset ID:
-        HubAssetId = "rbxassetid://1234567890", 
+        -- Replace with your uploaded Roblox Decal/Asset ID if needed:
+        HubAssetId = "rbxassetid://10723345518", 
         Theme = {
             Turquoise = Color3.fromRGB(64, 224, 208),     -- Main Accent Color
             TurquoiseDark = Color3.fromRGB(15, 55, 60),    -- Background Tint
@@ -349,29 +349,32 @@ function UI.BuildMobileUI()
     Header.BackgroundTransparency = 1
     Header.Parent = Main
 
-    -- Identity Profile Image Badge
+    -- Identity Profile Image Badge (Explicitly Positioned On Left)
     local HeaderIcon = Instance.new("ImageLabel")
     HeaderIcon.Name = "HubIcon"
-    HeaderIcon.Size = UDim2.new(0, 24, 0, 24)
-    HeaderIcon.Position = UDim2.new(0, 0, 0.5, -12)
+    HeaderIcon.Size = UDim2.new(0, 26, 0, 26)
+    HeaderIcon.Position = UDim2.new(0, 0, 0.5, -13)
     HeaderIcon.BackgroundTransparency = 1
     HeaderIcon.Image = Core.Config.HubAssetId
+    HeaderIcon.ImageColor3 = Color3.fromRGB(255, 255, 255)
+    HeaderIcon.ZIndex = 5
     HeaderIcon.Parent = Header
 
     local HeaderIconCorner = Instance.new("UICorner")
     HeaderIconCorner.CornerRadius = UDim.new(0, 6)
     HeaderIconCorner.Parent = HeaderIcon
 
-    -- Hub Title
+    -- Hub Title Positioned Beside Icon
     local HeaderTitle = Instance.new("TextLabel")
     HeaderTitle.Text = Core.Config.HubName
     HeaderTitle.Font = Enum.Font.GothamBold
     HeaderTitle.TextSize = 13
     HeaderTitle.TextColor3 = Core.Config.Theme.Turquoise
     HeaderTitle.TextXAlignment = Enum.TextXAlignment.Left
-    HeaderTitle.Position = UDim2.new(0, 32, 0, 0)
+    HeaderTitle.Position = UDim2.new(0, 34, 0, 0)
     HeaderTitle.Size = UDim2.new(0.65, 0, 1, 0)
     HeaderTitle.BackgroundTransparency = 1
+    HeaderTitle.ZIndex = 5
     HeaderTitle.Parent = Header
 
     -- Close Button
@@ -386,6 +389,7 @@ function UI.BuildMobileUI()
     CloseBtn.BorderSizePixel = 0
     CloseBtn.Size = UDim2.new(0, 24, 0, 24)
     CloseBtn.Position = UDim2.new(1, -26, 0, 4)
+    CloseBtn.ZIndex = 5
     CloseBtn.Parent = Header
 
     local CloseCorner = Instance.new("UICorner")
@@ -416,13 +420,14 @@ function UI.BuildMobileUI()
     OpenStroke.Transparency = 0.2
     OpenStroke.Parent = OpenBtn
 
-    -- Widget Bubble Image Badge
+    -- Widget Bubble Image Badge (Left Aligned)
     local OpenIcon = Instance.new("ImageLabel")
     OpenIcon.Name = "HubIcon"
     OpenIcon.Size = UDim2.new(0, 24, 0, 24)
     OpenIcon.Position = UDim2.new(0, 8, 0.5, -12)
     OpenIcon.BackgroundTransparency = 1
     OpenIcon.Image = Core.Config.HubAssetId
+    OpenIcon.ZIndex = 5
     OpenIcon.Parent = OpenBtn
 
     local OpenIconCorner = Instance.new("UICorner")
@@ -439,6 +444,7 @@ function UI.BuildMobileUI()
     OpenText.Position = UDim2.new(0, 38, 0, 0)
     OpenText.Size = UDim2.new(1, -38, 1, 0)
     OpenText.BackgroundTransparency = 1
+    OpenText.ZIndex = 5
     OpenText.Parent = OpenBtn
 
     -- Toggle Window Display
