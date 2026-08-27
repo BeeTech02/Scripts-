@@ -1,22 +1,24 @@
 -- ============================================================================
 -- XORQEN HUB CONFIGURATION & SOURCE CODE
--- Theme: Dark Slate Gray & Turquoise Glow
--- Layout: Pure Text-Only Header & Turquoise Floating Bubble Widget
+-- Theme: Light Turquoise Background & Clean UI Styling
+-- Layout: Pure Text Header & Light Modern Theme
 -- ============================================================================
 
 local Core = {
     Config = {
-        Version = "3.1.0-TurquoiseBubbleTextFix",
+        Version = "3.2.0-LightTurquoiseTheme",
         HubName = "XORQEN HUB",
         Theme = {
-            Turquoise = Color3.fromRGB(64, 224, 208),      -- Active Accent Color
-            TurquoiseGlow = Color3.fromRGB(0, 245, 212),     -- Glow Pulse Color
-            DarkSlateBg = Color3.fromRGB(30, 34, 32),       -- Bubble & UI Dark Gray
-            TextWhite = Color3.fromRGB(255, 255, 255),       -- Card Option Text
-            ToggleOff = Color3.fromRGB(20, 35, 40),
+            LightTurquoise = Color3.fromRGB(175, 238, 238),    -- Light Turquoise Main Bg
+            LightTurquoiseCard = Color3.fromRGB(205, 245, 245),  -- Bright Card Bg
+            TurquoiseAccent = Color3.fromRGB(0, 160, 160),      -- Deep Turquoise for Details
+            TextDark = Color3.fromRGB(20, 30, 35),              -- High-Contrast Dark Text
+            TextWhite = Color3.fromRGB(255, 255, 255),
+            ToggleOn = Color3.fromRGB(0, 180, 180),             -- Active Switch Color
+            ToggleOff = Color3.fromRGB(160, 190, 190),            -- Inactive Switch Color
             CloseRed = Color3.fromRGB(255, 60, 80),
-            Warning = Color3.fromRGB(255, 170, 0),
-            Danger = Color3.fromRGB(255, 50, 50)
+            Warning = Color3.fromRGB(255, 140, 0),
+            Danger = Color3.fromRGB(220, 40, 40)
         }
     },
     State = {
@@ -240,8 +242,8 @@ function UI.CreateToggleSwitchRow(parent, labelText, stateKey)
 
     local glassBg = Instance.new("Frame")
     glassBg.Size = UDim2.new(1, 0, 1, 0)
-    glassBg.BackgroundColor3 = Color3.fromRGB(15, 20, 20)
-    glassBg.BackgroundTransparency = 0.35
+    glassBg.BackgroundColor3 = Core.Config.Theme.LightTurquoiseCard
+    glassBg.BackgroundTransparency = 0.15
     glassBg.Parent = widgetCard
 
     local cardCorner = Instance.new("UICorner")
@@ -249,7 +251,7 @@ function UI.CreateToggleSwitchRow(parent, labelText, stateKey)
     cardCorner.Parent = glassBg
 
     local cardStroke = Instance.new("UIStroke")
-    cardStroke.Color = Core.State[stateKey] and Core.Config.Theme.Turquoise or Color3.fromRGB(45, 55, 55)
+    cardStroke.Color = Core.State[stateKey] and Core.Config.Theme.TurquoiseAccent or Color3.fromRGB(140, 210, 210)
     cardStroke.Thickness = 1.25
     cardStroke.Transparency = 0.1
     cardStroke.Parent = glassBg
@@ -258,7 +260,7 @@ function UI.CreateToggleSwitchRow(parent, labelText, stateKey)
     label.Text = labelText
     label.Font = Enum.Font.GothamBold
     label.TextSize = 12
-    label.TextColor3 = Core.Config.Theme.TextWhite
+    label.TextColor3 = Core.Config.Theme.TextDark
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Position = UDim2.new(0, 12, 0, 0)
     label.Size = UDim2.new(0.6, 0, 1, 0)
@@ -269,8 +271,8 @@ function UI.CreateToggleSwitchRow(parent, labelText, stateKey)
     switchBg.Text = ""
     switchBg.Size = UDim2.new(0, 46, 0, 22)
     switchBg.Position = UDim2.new(1, -56, 0.5, -11)
-    switchBg.BackgroundColor3 = Core.State[stateKey] and Core.Config.Theme.Turquoise or Core.Config.Theme.ToggleOff
-    switchBg.BackgroundTransparency = 0.15
+    switchBg.BackgroundColor3 = Core.State[stateKey] and Core.Config.Theme.ToggleOn or Core.Config.Theme.ToggleOff
+    switchBg.BackgroundTransparency = 0.05
     switchBg.BorderSizePixel = 0
     switchBg.Parent = widgetCard
 
@@ -279,7 +281,7 @@ function UI.CreateToggleSwitchRow(parent, labelText, stateKey)
     switchCorner.Parent = switchBg
 
     local switchStroke = Instance.new("UIStroke")
-    switchStroke.Color = Core.State[stateKey] and Core.Config.Theme.TurquoiseGlow or Color3.fromRGB(45, 85, 90)
+    switchStroke.Color = Core.State[stateKey] and Core.Config.Theme.TurquoiseAccent or Color3.fromRGB(130, 180, 180)
     switchStroke.Thickness = 1.25
     switchStroke.Parent = switchBg
 
@@ -297,9 +299,9 @@ function UI.CreateToggleSwitchRow(parent, labelText, stateKey)
     switchBg.MouseButton1Click:Connect(function()
         Core.State[stateKey] = not Core.State[stateKey]
         local active = Core.State[stateKey]
-        switchBg.BackgroundColor3 = active and Core.Config.Theme.Turquoise or Core.Config.Theme.ToggleOff
-        cardStroke.Color = active and Core.Config.Theme.Turquoise or Color3.fromRGB(45, 55, 55)
-        switchStroke.Color = active and Core.Config.Theme.TurquoiseGlow or Color3.fromRGB(45, 85, 90)
+        switchBg.BackgroundColor3 = active and Core.Config.Theme.ToggleOn or Core.Config.Theme.ToggleOff
+        cardStroke.Color = active and Core.Config.Theme.TurquoiseAccent or Color3.fromRGB(140, 210, 210)
+        switchStroke.Color = active and Core.Config.Theme.TurquoiseAccent or Color3.fromRGB(130, 180, 180)
         knob.Position = active and UDim2.new(1, -20, 0.5, -9) or UDim2.new(0, 2, 0.5, -9)
     end)
 
@@ -326,18 +328,18 @@ function UI.BuildMobileUI()
 
     local MainBgPanel = Instance.new("Frame")
     MainBgPanel.Size = UDim2.new(1, 0, 1, 0)
-    MainBgPanel.BackgroundColor3 = Core.Config.Theme.DarkSlateBg
-    MainBgPanel.BackgroundTransparency = 0.1
+    MainBgPanel.BackgroundColor3 = Core.Config.Theme.LightTurquoise
+    MainBgPanel.BackgroundTransparency = 0.05
     MainBgPanel.Parent = Main
 
     local MainCorner = Instance.new("UICorner")
     MainCorner.CornerRadius = UDim.new(0, 16)
     MainCorner.Parent = MainBgPanel
 
-    local MainNeonStroke = Instance.new("UIStroke")
-    MainNeonStroke.Color = Core.Config.Theme.Turquoise
-    MainNeonStroke.Thickness = 2
-    MainNeonStroke.Parent = MainBgPanel
+    local MainStroke = Instance.new("UIStroke")
+    MainStroke.Color = Core.Config.Theme.TurquoiseAccent
+    MainStroke.Thickness = 2
+    MainStroke.Parent = MainBgPanel
 
     -- Header Panel
     local Header = Instance.new("Frame")
@@ -346,12 +348,12 @@ function UI.BuildMobileUI()
     Header.BackgroundTransparency = 1
     Header.Parent = Main
 
-    -- Header Title (Pure Text, Left Aligned)
+    -- Text Title
     local HeaderTitle = Instance.new("TextLabel")
     HeaderTitle.Text = Core.Config.HubName
     HeaderTitle.Font = Enum.Font.GothamBold
     HeaderTitle.TextSize = 14
-    HeaderTitle.TextColor3 = Core.Config.Theme.Turquoise
+    HeaderTitle.TextColor3 = Core.Config.Theme.TextDark
     HeaderTitle.TextXAlignment = Enum.TextXAlignment.Left
     HeaderTitle.Position = UDim2.new(0, 6, 0, 0)
     HeaderTitle.Size = UDim2.new(0.7, 0, 1, 0)
@@ -367,7 +369,7 @@ function UI.BuildMobileUI()
     CloseBtn.TextSize = 18
     CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     CloseBtn.BackgroundColor3 = Core.Config.Theme.CloseRed
-    CloseBtn.BackgroundTransparency = 0.1
+    CloseBtn.BackgroundTransparency = 0.05
     CloseBtn.BorderSizePixel = 0
     CloseBtn.Size = UDim2.new(0, 24, 0, 24)
     CloseBtn.Position = UDim2.new(1, -24, 0, 4)
@@ -378,7 +380,7 @@ function UI.BuildMobileUI()
     CloseCorner.CornerRadius = UDim.new(1, 0)
     CloseCorner.Parent = CloseBtn
 
-    -- Draggable Floating Widget Bubble
+    -- Draggable Floating Widget Bubble (Light Turquoise Theme)
     local OpenBtn = Instance.new("TextButton")
     OpenBtn.Name = "OpenButton"
     OpenBtn.Text = ""
@@ -387,7 +389,7 @@ function UI.BuildMobileUI()
     OpenBtn.Visible = false
     OpenBtn.Active = true
     OpenBtn.Draggable = true
-    OpenBtn.BackgroundColor3 = Core.Config.Theme.DarkSlateBg
+    OpenBtn.BackgroundColor3 = Core.Config.Theme.LightTurquoise
     OpenBtn.BackgroundTransparency = 0.05
     OpenBtn.BorderSizePixel = 0
     OpenBtn.Parent = ScreenGui
@@ -397,16 +399,16 @@ function UI.BuildMobileUI()
     OpenCorner.Parent = OpenBtn
 
     local OpenStroke = Instance.new("UIStroke")
-    OpenStroke.Color = Core.Config.Theme.Turquoise
-    OpenStroke.Thickness = 1.2
+    OpenStroke.Color = Core.Config.Theme.TurquoiseAccent
+    OpenStroke.Thickness = 1.5
     OpenStroke.Parent = OpenBtn
 
-    -- Floating Widget Bubble Title (Turquoise Color)
+    -- Floating Widget Bubble Title
     local OpenText = Instance.new("TextLabel")
     OpenText.Text = Core.Config.HubName
     OpenText.Font = Enum.Font.GothamBold
     OpenText.TextSize = 13
-    OpenText.TextColor3 = Core.Config.Theme.Turquoise
+    OpenText.TextColor3 = Core.Config.Theme.TextDark
     OpenText.TextXAlignment = Enum.TextXAlignment.Center
     OpenText.Position = UDim2.new(0, 0, 0, 0)
     OpenText.Size = UDim2.new(1, 0, 1, 0)
@@ -423,21 +425,6 @@ function UI.BuildMobileUI()
     OpenBtn.MouseButton1Click:Connect(function()
         Main.Visible = true
         OpenBtn.Visible = false
-    end)
-
-    -- Synchronized Pulsing Neon Effect (Both Header and Bubble Text turn Turquoise/Glow)
-    task.spawn(function()
-        local t = 0
-        while task.wait(0.03) do
-            t = t + 0.05
-            local pulse = (math.sin(t) + 1) / 2
-            local currentTurquoise = Core.Config.Theme.Turquoise:Lerp(Core.Config.Theme.TurquoiseGlow, pulse)
-            
-            MainNeonStroke.Color = currentTurquoise
-            HeaderTitle.TextColor3 = currentTurquoise
-            OpenText.TextColor3 = currentTurquoise
-            OpenStroke.Color = currentTurquoise
-        end
     end)
 
     -- Container for Toggles
