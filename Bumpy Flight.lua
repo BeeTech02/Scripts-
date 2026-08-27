@@ -1,21 +1,21 @@
 -- ============================================================================
 -- XORQEN HUB — BUMPY FLIGHT (ROBLOX)
--- Theme: Soft Glassmorphic Light Turquoise (Modern OS Style)
--- Version: 1.0.6-GlassmorphicLightUI
+-- Theme: Official XORQEN HUB Mint/Teal UI
+-- Version: 1.0.6-XorqenOfficialUI
 -- ============================================================================
 
 local Core = {
     Config = {
-        Version = "1.0.6-GlassmorphicLightUI",
+        Version = "1.0.6-XorqenOfficialUI",
         HubName = "XORQEN HUB",
         Theme = {
-            LightTurquoiseBg = Color3.fromRGB(215, 248, 246),   -- Soft pastel turquoise background
-            CardBg = Color3.fromRGB(235, 253, 252),           -- Frosted card fill
-            TurquoiseBorder = Color3.fromRGB(110, 215, 205),    -- Subtle border outline
-            TextDark = Color3.fromRGB(25, 40, 42),              -- High-contrast slate dark text
-            ToggleOn = Color3.fromRGB(40, 195, 180),            -- Vibrant active switch accent
-            ToggleOff = Color3.fromRGB(185, 205, 202),           -- Soft inactive switch fill
-            CloseRed = Color3.fromRGB(255, 85, 100),
+            MainBg = Color3.fromRGB(162, 230, 225),          -- Bright Mint/Turquoise Panel
+            CardBg = Color3.fromRGB(188, 242, 238),          -- Inner Card Mint Fill
+            TealBorder = Color3.fromRGB(14, 150, 150),        -- Sharp Dark Teal Outline
+            TextDark = Color3.fromRGB(15, 25, 28),            -- High-Contrast Dark Text
+            ToggleOn = Color3.fromRGB(0, 185, 185),           -- Solid Cyan/Teal Active Switch
+            ToggleOff = Color3.fromRGB(160, 180, 180),         -- Grey Inactive Switch Fill
+            CloseRed = Color3.fromRGB(255, 75, 90),           -- Red Circular Close Button
             Passenger = Color3.fromRGB(0, 180, 120),
             Crew = Color3.fromRGB(220, 150, 0),
             TaskObj = Color3.fromRGB(0, 150, 220),
@@ -283,64 +283,52 @@ function Features.InitAutoEquipEmergency()
 end
 
 -- ============================================================================
--- UI BUILDER (XORQEN HUB GLASSMORPHIC BLUEPRINT)
+-- UI BUILDER (EXACT XORQEN HUB BLUEPRINT MATCH)
 -- ============================================================================
 local UI = {}
 
 function UI.CreateToggleSwitchRow(parent, labelText, stateKey)
-    local widgetCard = Instance.new("Frame")
-    widgetCard.Size = UDim2.new(1, 0, 0, 40)
-    widgetCard.BackgroundTransparency = 1
-    widgetCard.Parent = parent
-
-    local glassBg = Instance.new("Frame")
-    glassBg.Size = UDim2.new(1, 0, 1, 0)
-    glassBg.BackgroundColor3 = Core.Config.Theme.CardBg
-    glassBg.BackgroundTransparency = 0.25
-    glassBg.Parent = widgetCard
+    local card = Instance.new("Frame")
+    card.Size = UDim2.new(1, 0, 0, 42)
+    card.BackgroundColor3 = Core.Config.Theme.CardBg
+    card.BorderSizePixel = 0
+    card.Parent = parent
 
     local cardCorner = Instance.new("UICorner")
-    cardCorner.CornerRadius = UDim.new(0, 10)
-    cardCorner.Parent = glassBg
+    cardCorner.CornerRadius = UDim.new(0, 12)
+    cardCorner.Parent = card
 
     local cardStroke = Instance.new("UIStroke")
-    cardStroke.Color = Core.State[stateKey] and Core.Config.Theme.ToggleOn or Core.Config.Theme.TurquoiseBorder
-    cardStroke.Thickness = 1.2
-    cardStroke.Transparency = 0.2
-    cardStroke.Parent = glassBg
+    cardStroke.Color = Core.Config.Theme.TealBorder
+    cardStroke.Thickness = 1.5
+    cardStroke.Parent = card
 
     local label = Instance.new("TextLabel")
     label.Text = labelText
     label.Font = Enum.Font.GothamBold
-    label.TextSize = 11
+    label.TextSize = 12
     label.TextColor3 = Core.Config.Theme.TextDark
     label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Position = UDim2.new(0, 12, 0, 0)
+    label.Position = UDim2.new(0, 14, 0, 0)
     label.Size = UDim2.new(0.65, 0, 1, 0)
     label.BackgroundTransparency = 1
-    label.Parent = widgetCard
+    label.Parent = card
 
     local switchBg = Instance.new("TextButton")
     switchBg.Text = ""
-    switchBg.Size = UDim2.new(0, 44, 0, 20)
-    switchBg.Position = UDim2.new(1, -52, 0.5, -10)
+    switchBg.Size = UDim2.new(0, 48, 0, 24)
+    switchBg.Position = UDim2.new(1, -56, 0.5, -12)
     switchBg.BackgroundColor3 = Core.State[stateKey] and Core.Config.Theme.ToggleOn or Core.Config.Theme.ToggleOff
-    switchBg.BackgroundTransparency = 0.1
     switchBg.BorderSizePixel = 0
-    switchBg.Parent = widgetCard
+    switchBg.Parent = card
 
     local switchCorner = Instance.new("UICorner")
     switchCorner.CornerRadius = UDim.new(1, 0)
     switchCorner.Parent = switchBg
 
-    local switchStroke = Instance.new("UIStroke")
-    switchStroke.Color = Core.State[stateKey] and Core.Config.Theme.ToggleOn or Core.Config.Theme.TurquoiseBorder
-    switchStroke.Thickness = 1
-    switchStroke.Parent = switchBg
-
     local knob = Instance.new("Frame")
-    knob.Size = UDim2.new(0, 16, 0, 16)
-    knob.Position = Core.State[stateKey] and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
+    knob.Size = UDim2.new(0, 20, 0, 20)
+    knob.Position = Core.State[stateKey] and UDim2.new(1, -22, 0.5, -10) or UDim2.new(0, 2, 0.5, -10)
     knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     knob.BorderSizePixel = 0
     knob.Parent = switchBg
@@ -353,51 +341,43 @@ function UI.CreateToggleSwitchRow(parent, labelText, stateKey)
         Core.State[stateKey] = not Core.State[stateKey]
         local active = Core.State[stateKey]
         switchBg.BackgroundColor3 = active and Core.Config.Theme.ToggleOn or Core.Config.Theme.ToggleOff
-        cardStroke.Color = active and Core.Config.Theme.ToggleOn or Core.Config.Theme.TurquoiseBorder
-        switchStroke.Color = active and Core.Config.Theme.ToggleOn or Core.Config.Theme.TurquoiseBorder
-        knob.Position = active and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
+        knob.Position = active and UDim2.new(1, -22, 0.5, -10) or UDim2.new(0, 2, 0.5, -10)
     end)
 
-    return widgetCard
+    return card
 end
 
 function UI.BuildMobileUI()
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "XorqenHubMobileUI"
+    ScreenGui.Name = "XorqenHubGui"
     ScreenGui.ResetOnSpawn = false
 
     pcall(function() ScreenGui.Parent = Core.Services.CoreGui end)
     if not ScreenGui.Parent then ScreenGui.Parent = Core.LocalPlayer:WaitForChild("PlayerGui") end
-    Core.ScreenGui = ScreenGui
 
-    -- Main Frame Window
+    -- Main Window Panel
     local Main = Instance.new("Frame")
     Main.Name = "MainWindow"
-    Main.Size = UDim2.new(0, 310, 0, 330)
-    Main.Position = UDim2.new(0.5, -155, 0.5, -165)
-    Main.BackgroundTransparency = 1
+    Main.Size = UDim2.new(0, 320, 0, 340)
+    Main.Position = UDim2.new(0.5, -160, 0.5, -170)
+    Main.BackgroundColor3 = Core.Config.Theme.MainBg
+    Main.BorderSizePixel = 0
     Main.Active = true
     Main.Draggable = true
     Main.Parent = ScreenGui
 
-    local MainBgPanel = Instance.new("Frame")
-    MainBgPanel.Size = UDim2.new(1, 0, 1, 0)
-    MainBgPanel.BackgroundColor3 = Core.Config.Theme.LightTurquoiseBg
-    MainBgPanel.BackgroundTransparency = 0.15
-    MainBgPanel.Parent = Main
-
     local MainCorner = Instance.new("UICorner")
-    MainCorner.CornerRadius = UDim.new(0, 16)
-    MainCorner.Parent = MainBgPanel
+    MainCorner.CornerRadius = UDim.new(0, 18)
+    MainCorner.Parent = Main
 
     local MainStroke = Instance.new("UIStroke")
-    MainStroke.Color = Core.Config.Theme.TurquoiseBorder
-    MainStroke.Thickness = 1.5
-    MainStroke.Parent = MainBgPanel
+    MainStroke.Color = Core.Config.Theme.TealBorder
+    MainStroke.Thickness = 2
+    MainStroke.Parent = Main
 
     -- Header Panel
     local Header = Instance.new("Frame")
-    Header.Size = UDim2.new(1, -20, 0, 32)
+    Header.Size = UDim2.new(1, -20, 0, 36)
     Header.Position = UDim2.new(0, 10, 0, 10)
     Header.BackgroundTransparency = 1
     Header.Parent = Main
@@ -408,13 +388,12 @@ function UI.BuildMobileUI()
     HeaderTitle.TextSize = 14
     HeaderTitle.TextColor3 = Core.Config.Theme.TextDark
     HeaderTitle.TextXAlignment = Enum.TextXAlignment.Left
-    HeaderTitle.Position = UDim2.new(0, 6, 0, 0)
+    HeaderTitle.Position = UDim2.new(0, 8, 0, 0)
     HeaderTitle.Size = UDim2.new(0.7, 0, 1, 0)
     HeaderTitle.BackgroundTransparency = 1
-    HeaderTitle.ZIndex = 5
     HeaderTitle.Parent = Header
 
-    -- Close (Minimize) Button
+    -- Close (X) Button
     local CloseBtn = Instance.new("TextButton")
     CloseBtn.Name = "CloseButton"
     CloseBtn.Text = "×"
@@ -422,28 +401,28 @@ function UI.BuildMobileUI()
     CloseBtn.TextSize = 18
     CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     CloseBtn.BackgroundColor3 = Core.Config.Theme.CloseRed
-    CloseBtn.BackgroundTransparency = 0.05
     CloseBtn.BorderSizePixel = 0
-    CloseBtn.Size = UDim2.new(0, 24, 0, 24)
-    CloseBtn.Position = UDim2.new(1, -24, 0, 4)
-    CloseBtn.ZIndex = 5
+    CloseBtn.Size = UDim2.new(0, 26, 0, 26)
+    CloseBtn.Position = UDim2.new(1, -26, 0.5, -13)
     CloseBtn.Parent = Header
 
     local CloseCorner = Instance.new("UICorner")
     CloseCorner.CornerRadius = UDim.new(1, 0)
     CloseCorner.Parent = CloseBtn
 
-    -- Floating Open Widget Button
+    -- Floating Open/Minimize Button
     local OpenBtn = Instance.new("TextButton")
     OpenBtn.Name = "OpenButton"
-    OpenBtn.Text = ""
-    OpenBtn.Size = UDim2.new(0, 160, 0, 42)
+    OpenBtn.Text = Core.Config.HubName
+    OpenBtn.Font = Enum.Font.GothamBold
+    OpenBtn.TextSize = 12
+    OpenBtn.TextColor3 = Core.Config.Theme.TextDark
+    OpenBtn.Size = UDim2.new(0, 130, 0, 38)
     OpenBtn.Position = UDim2.new(0.05, 0, 0.2, 0)
     OpenBtn.Visible = false
     OpenBtn.Active = true
     OpenBtn.Draggable = true
-    OpenBtn.BackgroundColor3 = Core.Config.Theme.LightTurquoiseBg
-    OpenBtn.BackgroundTransparency = 0.15
+    OpenBtn.BackgroundColor3 = Core.Config.Theme.MainBg
     OpenBtn.BorderSizePixel = 0
     OpenBtn.Parent = ScreenGui
 
@@ -452,23 +431,11 @@ function UI.BuildMobileUI()
     OpenCorner.Parent = OpenBtn
 
     local OpenStroke = Instance.new("UIStroke")
-    OpenStroke.Color = Core.Config.Theme.TurquoiseBorder
-    OpenStroke.Thickness = 1.5
+    OpenStroke.Color = Core.Config.Theme.TealBorder
+    OpenStroke.Thickness = 2
     OpenStroke.Parent = OpenBtn
 
-    local OpenText = Instance.new("TextLabel")
-    OpenText.Text = Core.Config.HubName
-    OpenText.Font = Enum.Font.GothamBold
-    OpenText.TextSize = 13
-    OpenText.TextColor3 = Core.Config.Theme.TextDark
-    OpenText.TextXAlignment = Enum.TextXAlignment.Center
-    OpenText.Position = UDim2.new(0, 0, 0, 0)
-    OpenText.Size = UDim2.new(1, 0, 1, 0)
-    OpenText.BackgroundTransparency = 1
-    OpenText.ZIndex = 5
-    OpenText.Parent = OpenBtn
-
-    -- Toggle Display Logic
+    -- Display Toggle Actions
     CloseBtn.MouseButton1Click:Connect(function()
         Main.Visible = false
         OpenBtn.Visible = true
@@ -479,10 +446,10 @@ function UI.BuildMobileUI()
         OpenBtn.Visible = false
     end)
 
-    -- Container for Toggles
+    -- Container for Options
     local Container = Instance.new("Frame")
-    Container.Size = UDim2.new(1, -20, 1, -54)
-    Container.Position = UDim2.new(0, 10, 0, 48)
+    Container.Size = UDim2.new(1, -24, 1, -56)
+    Container.Position = UDim2.new(0, 12, 0, 48)
     Container.BackgroundTransparency = 1
     Container.Parent = Main
 
