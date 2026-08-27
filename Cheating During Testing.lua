@@ -1,18 +1,18 @@
 -- ============================================================================
 -- XORQEN HUB CONFIGURATION & SOURCE CODE
 -- Theme: Dark Slate Gray & Turquoise Glow
--- Layout: Text-Only Header & Bubble Widget Alignment
+-- Layout: Pure Text-Only Header & Turquoise Floating Bubble Widget
 -- ============================================================================
 
 local Core = {
     Config = {
-        Version = "3.0.0-CleanNoImages",
+        Version = "3.1.0-TurquoiseBubbleTextFix",
         HubName = "XORQEN HUB",
         Theme = {
             Turquoise = Color3.fromRGB(64, 224, 208),      -- Active Accent Color
             TurquoiseGlow = Color3.fromRGB(0, 245, 212),     -- Glow Pulse Color
             DarkSlateBg = Color3.fromRGB(30, 34, 32),       -- Bubble & UI Dark Gray
-            TextWhite = Color3.fromRGB(255, 255, 255),       -- White Text
+            TextWhite = Color3.fromRGB(255, 255, 255),       -- Card Option Text
             ToggleOff = Color3.fromRGB(20, 35, 40),
             CloseRed = Color3.fromRGB(255, 60, 80),
             Warning = Color3.fromRGB(255, 170, 0),
@@ -346,14 +346,14 @@ function UI.BuildMobileUI()
     Header.BackgroundTransparency = 1
     Header.Parent = Main
 
-    -- Text-Only Hub Title (Properly Centered / Aligned)
+    -- Header Title (Pure Text, Left Aligned)
     local HeaderTitle = Instance.new("TextLabel")
     HeaderTitle.Text = Core.Config.HubName
     HeaderTitle.Font = Enum.Font.GothamBold
     HeaderTitle.TextSize = 14
     HeaderTitle.TextColor3 = Core.Config.Theme.Turquoise
     HeaderTitle.TextXAlignment = Enum.TextXAlignment.Left
-    HeaderTitle.Position = UDim2.new(0, 10, 0, 0)
+    HeaderTitle.Position = UDim2.new(0, 6, 0, 0)
     HeaderTitle.Size = UDim2.new(0.7, 0, 1, 0)
     HeaderTitle.BackgroundTransparency = 1
     HeaderTitle.ZIndex = 5
@@ -378,7 +378,7 @@ function UI.BuildMobileUI()
     CloseCorner.CornerRadius = UDim.new(1, 0)
     CloseCorner.Parent = CloseBtn
 
-    -- Draggable Floating Widget Bubble (Matches Screenshot Slate Gray & White Text)
+    -- Draggable Floating Widget Bubble
     local OpenBtn = Instance.new("TextButton")
     OpenBtn.Name = "OpenButton"
     OpenBtn.Text = ""
@@ -393,20 +393,20 @@ function UI.BuildMobileUI()
     OpenBtn.Parent = ScreenGui
 
     local OpenCorner = Instance.new("UICorner")
-    OpenCorner.CornerRadius = UDim.new(1, 0) -- Full rounded pill shape
+    OpenCorner.CornerRadius = UDim.new(1, 0)
     OpenCorner.Parent = OpenBtn
 
     local OpenStroke = Instance.new("UIStroke")
-    OpenStroke.Color = Color3.fromRGB(60, 65, 62)
+    OpenStroke.Color = Core.Config.Theme.Turquoise
     OpenStroke.Thickness = 1.2
     OpenStroke.Parent = OpenBtn
 
-    -- Widget Bubble Title Text
+    -- Floating Widget Bubble Title (Turquoise Color)
     local OpenText = Instance.new("TextLabel")
     OpenText.Text = Core.Config.HubName
     OpenText.Font = Enum.Font.GothamBold
     OpenText.TextSize = 13
-    OpenText.TextColor3 = Core.Config.Theme.TextWhite
+    OpenText.TextColor3 = Core.Config.Theme.Turquoise
     OpenText.TextXAlignment = Enum.TextXAlignment.Center
     OpenText.Position = UDim2.new(0, 0, 0, 0)
     OpenText.Size = UDim2.new(1, 0, 1, 0)
@@ -425,7 +425,7 @@ function UI.BuildMobileUI()
         OpenBtn.Visible = false
     end)
 
-    -- Pulsing Neon Accent Effect
+    -- Synchronized Pulsing Neon Effect (Both Header and Bubble Text turn Turquoise/Glow)
     task.spawn(function()
         local t = 0
         while task.wait(0.03) do
@@ -435,6 +435,8 @@ function UI.BuildMobileUI()
             
             MainNeonStroke.Color = currentTurquoise
             HeaderTitle.TextColor3 = currentTurquoise
+            OpenText.TextColor3 = currentTurquoise
+            OpenStroke.Color = currentTurquoise
         end
     end)
 
