@@ -1,20 +1,20 @@
 -- ============================================================================
--- XORQEN HUB — DIRECT LUA BUILDER (OS 26 GLASS WIDGETS + NEON BG)
+-- XORQEN HUB — DIRECT LUA BUILDER (TURQUOISE OS 26 GLASS WIDGET EDITION)
 -- Target Game: Cheating During Testing [BETA] (Roblox)
--- Architecture: Dynamic Neon Background + OS 26 Glass Floating Widgets
--- Version: 2.1.0-NeonGlass
+-- Architecture: Dynamic Turquoise Theme + OS 26 Glass Floating Widgets
+-- Version: 2.2.0-TurquoiseGlass
 -- ============================================================================
 
 local Core = {
     Config = {
-        Version = "2.1.0-NeonGlass",
+        Version = "2.2.0-TurquoiseGlass",
         Theme = {
-            NeonCyan = Color3.fromRGB(0, 240, 255),
-            NeonBlue = Color3.fromRGB(0, 120, 255),
-            NeonDarkTint = Color3.fromRGB(5, 25, 35), -- Dynamic Glass Tint
-            Text = Color3.fromRGB(240, 250, 255),
-            ToggleOff = Color3.fromRGB(20, 30, 45),
-            ToggleOn = Color3.fromRGB(0, 240, 255),
+            Turquoise = Color3.fromRGB(64, 224, 208),     -- Vibrant Turquoise Accent
+            TurquoiseDark = Color3.fromRGB(15, 55, 60),    -- Tinted Dark Turquoise Glass
+            TurquoiseGlow = Color3.fromRGB(0, 245, 212),    -- Bright Neon Turquoise Pulse
+            Text = Color3.fromRGB(240, 255, 255),
+            ToggleOff = Color3.fromRGB(20, 35, 40),
+            ToggleOn = Color3.fromRGB(64, 224, 208),
             CloseRed = Color3.fromRGB(255, 40, 70),
             Warning = Color3.fromRGB(255, 170, 0),
             Danger = Color3.fromRGB(255, 50, 50)
@@ -229,7 +229,7 @@ function Features.InitTeacherPatrols()
 end
 
 -- ============================================================================
--- OS 26 NEON GLASS UI ENGINE (BUTTON-MATCHED NEON BACKGROUND + GLASS WIDGETS)
+-- OS 26 NEON GLASS UI ENGINE (TURQUOISE EDITION)
 -- ============================================================================
 local UI = {}
 
@@ -242,7 +242,7 @@ function UI.CreateToggleSwitchRow(parent, labelText, stateKey)
     -- OS 26 Floating Glass Container
     local glassBg = Instance.new("Frame")
     glassBg.Size = UDim2.new(1, 0, 1, 0)
-    glassBg.BackgroundColor3 = Color3.fromRGB(12, 18, 28)
+    glassBg.BackgroundColor3 = Color3.fromRGB(10, 30, 35)
     glassBg.BackgroundTransparency = 0.45
     glassBg.Parent = widgetCard
 
@@ -251,7 +251,7 @@ function UI.CreateToggleSwitchRow(parent, labelText, stateKey)
     cardCorner.Parent = glassBg
 
     local cardStroke = Instance.new("UIStroke")
-    cardStroke.Color = Core.State[stateKey] and Core.Config.Theme.NeonCyan or Color3.fromRGB(45, 65, 90)
+    cardStroke.Color = Core.State[stateKey] and Core.Config.Theme.Turquoise or Color3.fromRGB(30, 70, 75)
     cardStroke.Thickness = 1.25
     cardStroke.Transparency = 0.1
     cardStroke.Parent = glassBg
@@ -267,12 +267,12 @@ function UI.CreateToggleSwitchRow(parent, labelText, stateKey)
     label.BackgroundTransparency = 1
     label.Parent = widgetCard
 
-    -- Neon Switch Button (Matches Hub Accent Glow)
+    -- Turquoise Toggle Switch Button
     local switchBg = Instance.new("TextButton")
     switchBg.Text = ""
     switchBg.Size = UDim2.new(0, 46, 0, 22)
     switchBg.Position = UDim2.new(1, -56, 0.5, -11)
-    switchBg.BackgroundColor3 = Core.State[stateKey] and Core.Config.Theme.ToggleOn or Core.Config.Theme.ToggleOff
+    switchBg.BackgroundColor3 = Core.State[stateKey] and Core.Config.Theme.Turquoise or Core.Config.Theme.ToggleOff
     switchBg.BackgroundTransparency = 0.15
     switchBg.BorderSizePixel = 0
     switchBg.Parent = widgetCard
@@ -282,7 +282,7 @@ function UI.CreateToggleSwitchRow(parent, labelText, stateKey)
     switchCorner.Parent = switchBg
 
     local switchStroke = Instance.new("UIStroke")
-    switchStroke.Color = Core.State[stateKey] and Core.Config.Theme.NeonCyan or Color3.fromRGB(70, 90, 115)
+    switchStroke.Color = Core.State[stateKey] and Core.Config.Theme.TurquoiseGlow or Color3.fromRGB(45, 85, 90)
     switchStroke.Thickness = 1.25
     switchStroke.Parent = switchBg
 
@@ -300,9 +300,9 @@ function UI.CreateToggleSwitchRow(parent, labelText, stateKey)
     switchBg.MouseButton1Click:Connect(function()
         Core.State[stateKey] = not Core.State[stateKey]
         local active = Core.State[stateKey]
-        switchBg.BackgroundColor3 = active and Core.Config.Theme.ToggleOn or Core.Config.Theme.ToggleOff
-        cardStroke.Color = active and Core.Config.Theme.NeonCyan or Color3.fromRGB(45, 65, 90)
-        switchStroke.Color = active and Core.Config.Theme.NeonCyan or Color3.fromRGB(70, 90, 115)
+        switchBg.BackgroundColor3 = active and Core.Config.Theme.Turquoise or Core.Config.Theme.ToggleOff
+        cardStroke.Color = active and Core.Config.Theme.Turquoise or Color3.fromRGB(30, 70, 75)
+        switchStroke.Color = active and Core.Config.Theme.TurquoiseGlow or Color3.fromRGB(45, 85, 90)
         knob.Position = active and UDim2.new(1, -20, 0.5, -9) or UDim2.new(0, 2, 0.5, -9)
     end)
 
@@ -311,7 +311,7 @@ end
 
 function UI.BuildMobileUI()
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "XorqenHubOS26Neon"
+    ScreenGui.Name = "XorqenHubTurquoise"
     ScreenGui.ResetOnSpawn = false
 
     pcall(function() ScreenGui.Parent = Core.Services.CoreGui end)
@@ -327,11 +327,11 @@ function UI.BuildMobileUI()
     Main.Draggable = true
     Main.Parent = ScreenGui
 
-    -- Neon Tinted Main Background Panel (Color Matches Cyan Button Theme)
+    -- Turquoise Glass Main Background Panel
     local MainBgPanel = Instance.new("Frame")
     MainBgPanel.Size = UDim2.new(1, 0, 1, 0)
-    MainBgPanel.BackgroundColor3 = Core.Config.Theme.NeonDarkTint
-    MainBgPanel.BackgroundTransparency = 0.25 -- Translucent Glass Effect
+    MainBgPanel.BackgroundColor3 = Core.Config.Theme.TurquoiseDark
+    MainBgPanel.BackgroundTransparency = 0.25
     MainBgPanel.Parent = Main
 
     local MainCorner = Instance.new("UICorner")
@@ -339,11 +339,11 @@ function UI.BuildMobileUI()
     MainCorner.Parent = MainBgPanel
 
     local MainNeonStroke = Instance.new("UIStroke")
-    MainNeonStroke.Color = Core.Config.Theme.NeonCyan
+    MainNeonStroke.Color = Core.Config.Theme.Turquoise
     MainNeonStroke.Thickness = 2
     MainNeonStroke.Parent = MainBgPanel
 
-    -- Header Title Bar Widget
+    -- Header Title Bar Widget (Preserved XORQEN HUB Header)
     local Header = Instance.new("Frame")
     Header.Size = UDim2.new(1, -20, 0, 32)
     Header.Position = UDim2.new(0, 10, 0, 10)
@@ -351,10 +351,10 @@ function UI.BuildMobileUI()
     Header.Parent = Main
 
     local HeaderTitle = Instance.new("TextLabel")
-    HeaderTitle.Text = "⚡ XORQEN OS 26"
+    HeaderTitle.Text = "⚡ XORQEN HUB"
     HeaderTitle.Font = Enum.Font.GothamBold
     HeaderTitle.TextSize = 14
-    HeaderTitle.TextColor3 = Core.Config.Theme.NeonCyan
+    HeaderTitle.TextColor3 = Core.Config.Theme.Turquoise
     HeaderTitle.TextXAlignment = Enum.TextXAlignment.Left
     HeaderTitle.Position = UDim2.new(0, 4, 0, 0)
     HeaderTitle.Size = UDim2.new(0.7, 0, 1, 0)
@@ -387,13 +387,13 @@ function UI.BuildMobileUI()
     -- Floating OS 26 Re-open Widget Badge
     local OpenBtn = Instance.new("TextButton")
     OpenBtn.Name = "OpenButton"
-    OpenBtn.Text = "⚡ OS 26"
+    OpenBtn.Text = "⚡ XORQEN HUB"
     OpenBtn.Font = Enum.Font.GothamBold
-    OpenBtn.TextSize = 12
-    OpenBtn.TextColor3 = Core.Config.Theme.NeonCyan
-    OpenBtn.BackgroundColor3 = Core.Config.Theme.NeonDarkTint
+    OpenBtn.TextSize = 11
+    OpenBtn.TextColor3 = Core.Config.Theme.Turquoise
+    OpenBtn.BackgroundColor3 = Core.Config.Theme.TurquoiseDark
     OpenBtn.BackgroundTransparency = 0.25
-    OpenBtn.Size = UDim2.new(0, 90, 0, 36)
+    OpenBtn.Size = UDim2.new(0, 110, 0, 36)
     OpenBtn.Position = UDim2.new(0.02, 0, 0.45, 0)
     OpenBtn.Visible = false
     OpenBtn.Active = true
@@ -405,7 +405,7 @@ function UI.BuildMobileUI()
     OpenCorner.Parent = OpenBtn
 
     local OpenStroke = Instance.new("UIStroke")
-    OpenStroke.Color = Core.Config.Theme.NeonCyan
+    OpenStroke.Color = Core.Config.Theme.Turquoise
     OpenStroke.Thickness = 2
     OpenStroke.Parent = OpenBtn
 
@@ -420,17 +420,18 @@ function UI.BuildMobileUI()
         OpenBtn.Visible = false
     end)
 
-    -- Pulsing Neon Theme Effect (Pulses Background & Outlines synchronously with buttons)
+    -- Synchronized Turquoise Neon Pulsing Effect
     task.spawn(function()
         local t = 0
         while task.wait(0.03) do
             t = t + 0.05
             local pulse = (math.sin(t) + 1) / 2
-            local currentNeon = Core.Config.Theme.NeonCyan:Lerp(Core.Config.Theme.NeonBlue, pulse)
+            local currentTurquoise = Core.Config.Theme.Turquoise:Lerp(Core.Config.Theme.TurquoiseGlow, pulse)
             
-            MainNeonStroke.Color = currentNeon
-            OpenStroke.Color = currentNeon
-            MainBgPanel.BackgroundColor3 = Color3.fromRGB(5, 20, 30):Lerp(Color3.fromRGB(0, 30, 45), pulse)
+            MainNeonStroke.Color = currentTurquoise
+            OpenStroke.Color = currentTurquoise
+            HeaderTitle.TextColor3 = currentTurquoise
+            MainBgPanel.BackgroundColor3 = Color3.fromRGB(10, 45, 50):Lerp(Color3.fromRGB(15, 60, 65), pulse)
         end
     end)
 
@@ -446,7 +447,7 @@ function UI.BuildMobileUI()
     layout.Padding = UDim.new(0, 6)
     layout.Parent = Container
 
-    -- 4 Clean OS 26 Floating Widgets
+    -- 4 Clean OS 26 Floating Glass Widgets
     UI.CreateToggleSwitchRow(Container, "Desk Snapping / Sitting", "DeskSnapping")
     UI.CreateToggleSwitchRow(Container, "Teacher Position Tracking", "TeacherPositionTracking")
     UI.CreateToggleSwitchRow(Container, "Anti Detect Engine", "AntiDetect")
@@ -464,7 +465,7 @@ function Core.Init()
     Features.InitDeskSnapping()
     Features.InitAntiDetect()
     Features.InitTeacherPatrols()
-    print("[XORQEN HUB OS 26] Button-Matched Neon Background & Glass Widgets Loaded.")
+    print("[XORQEN HUB] Turquoise Neon Glass Architecture Loaded Successfully.")
 end
 
 Core.Init()
