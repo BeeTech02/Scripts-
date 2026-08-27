@@ -1,12 +1,12 @@
 -- ============================================================================
--- NYZORA HUB — BUMPY FLIGHT (ROBLOX)
--- Master UI Match: Pumpkin Orange Glassmorphic Style
--- Version: 1.1.0-NyzoraPumpkin
+-- NYZORA HUB — TOWER OF HELL (ROBLOX)
+-- Pumpkin Orange Glassmorphic Style + Tower of Hell Exploits
+-- Version: 1.2.0-NyzoraToH
 -- ============================================================================
 
 local Core = {
     Config = {
-        Version = "1.1.0-NyzoraPumpkin",
+        Version = "1.2.0-NyzoraToH",
         HubName = "NYZORA HUB",
         Theme = {
             MainBg = Color3.fromRGB(245, 130, 60),           -- Pumpkin Glass Panel
@@ -17,37 +17,31 @@ local Core = {
             TextDark = Color3.fromRGB(45, 25, 15),            -- Dark Charcoal/Warm Slate Text
             ToggleOn = Color3.fromRGB(235, 100, 30),          -- Vivid Pumpkin Active Switch
             ToggleOff = Color3.fromRGB(210, 190, 180),        -- Muted Peach-Grey Inactive Switch
-            CloseRed = Color3.fromRGB(255, 85, 100),           -- Red Circular Close Button
-            Passenger = Color3.fromRGB(235, 110, 30),
-            Crew = Color3.fromRGB(220, 150, 0),
-            TaskObj = Color3.fromRGB(240, 140, 50),
-            System = Color3.fromRGB(220, 50, 60)
+            CloseRed = Color3.fromRGB(255, 85, 100)           -- Red Circular Close Button
         }
     },
     State = {
-        PassengerESP = false,
-        CrewESP = false,
-        DistanceIndicators = false,
-        TaskESP = false,
-        SystemESP = false,
-        AutoEquipEmergency = false
+        Godmode = false,
+        InfiniteJump = false,
+        Noclip = false,
+        Fly = false,
+        SpeedBoost = false,
+        JumpPowerBoost = false
     },
     Services = {
         Players = game:GetService("Players"),
         RunService = game:GetService("RunService"),
         Workspace = game:GetService("Workspace"),
-        CoreGui = game:GetService("CoreGui")
+        CoreGui = game:GetService("CoreGui"),
+        UserInputService = game:GetService("UserInputService")
     },
-    Connections = {},
-    Cache = {
-        Billboards = {}
-    }
+    Connections = {}
 }
 
 Core.LocalPlayer = Core.Services.Players.LocalPlayer
 
 -- ============================================================================
--- GAME ADAPTER
+-- GAME ADAPTER & EXPLOIT FUNCTIONS
 -- ============================================================================
 local Adapter = {}
 
@@ -67,229 +61,145 @@ function Adapter.GetHumanoid(player)
     return char and char:FindFirstChildOfClass("Humanoid")
 end
 
-function Adapter.IsCrew(player)
-    if not player then return false end
-    local role = player:GetAttribute("Role") or player:GetAttribute("Team")
-    local name = player.Name:lower()
+local Exploits = {}
+
+function Exploits.InstantWin()
+    local root = Adapter.GetRootPart()
+    if not root then return end
     
-    if role and (tostring(role):lower():find("pilot") or tostring(role):lower():find("crew") or tostring(role):lower():find("attendant")) then
-        return true
-    end
-    if name:find("pilot") or name:find("crew") or name:find("attendant") then
-        return true
-    end
-    return false
-end
-
-function Adapter.CreateOrGetBillboard(id, targetPart, color)
-    if Core.Cache.Billboards[id] and Core.Cache.Billboards[id].Parent then
-        return Core.Cache.Billboards[id]
-    end
-
-    local bill = Instance.new("BillboardGui")
-    bill.Name = "ESP_" .. id
-    bill.AlwaysOnTop = true
-    bill.Size = UDim2.new(0, 180, 0, 34)
-    bill.StudsOffset = Vector3.new(0, 3, 0)
-
-    local label = Instance.new("TextLabel")
-    label.Name = "Title"
-    label.Size = UDim2.new(1, 0, 1, 0)
-    label.BackgroundTransparency = 1
-    label.Font = Enum.Font.GothamBold
-    label.TextSize = 12
-    label.TextColor3 = color
-    label.TextStrokeTransparency = 0.2
-    label.Parent = bill
-
-    bill.Parent = targetPart
-    Core.Cache.Billboards[id] = bill
-    return bill
-end
-
-function Adapter.RemoveBillboard(id)
-    if Core.Cache.Billboards[id] then
-        Core.Cache.Billboards[id]:Destroy()
-        Core.Cache.Billboards[id] = nil
-    end
-end
-
--- ============================================================================
--- FEATURE MODULES
--- ============================================================================
-local Features = {}
-
-function Features.InitPlayerESP()
-    Core.Connections.PlayerESP = Core.Services.RunService.RenderStepped:Connect(function()
-        local myRoot = Adapter.GetRootPart()
-
-        for _, plr in ipairs(Core.Services.Players:GetPlayers()) do
-            if plr ~= Core.LocalPlayer then
-                local char = Adapter.GetCharacter(plr)
-                local root = Adapter.GetRootPart(plr)
-                local hum = Adapter.GetHumanoid(plr)
-                local id = "PLR_" .. plr.UserId
-
-                local isCrew = Adapter.IsCrew(plr)
-                local isPassenger = not isCrew
-
-                local shouldShow = (isCrew and Core.State.CrewESP) or (isPassenger and Core.State.PassengerESP) or Core.State.DistanceIndicators
-
-                if shouldShow and char and root then
-                    local color = isCrew and Core.Config.Theme.Crew or Core.Config.Theme.Passenger
-                    local bill = Adapter.CreateOrGetBillboard(id, root, color)
-                    bill.Enabled = true
-
-                    local isSeated = (hum and hum.SeatPart) or false
-                    local statusStr = isSeated and "[SEATED]" or "[UNBUCKLED]"
-                    local roleStr = isCrew and "CREW" or "PASSENGER"
-                    local distStr = ""
-
-                    if myRoot then
-                        local dist = math.floor((myRoot.Position - root.Position).Magnitude)
-                        distStr = string.format(" [%dm]", dist)
-                    end
-
-                    local lbl = bill:FindFirstChild("Title")
-                    if lbl then
-                        if (isCrew and Core.State.CrewESP) or (isPassenger and Core.State.PassengerESP) then
-                            lbl.Text = string.format("%s: %s %s%s", roleStr, plr.DisplayName, statusStr, distStr)
-                        else
-                            lbl.Text = string.format("%s%s", plr.DisplayName, distStr)
-                        end
-                    end
-                else
-                    Adapter.RemoveBillboard(id)
-                end
-            end
-        end
-    end)
-end
-
-function Features.InitTaskESP()
-    Core.Connections.TaskESP = Core.Services.RunService.RenderStepped:Connect(function()
-        if not Core.State.TaskESP then
-            for id, _ in pairs(Core.Cache.Billboards) do
-                if id:sub(1, 5) == "TASK_" then
-                    Adapter.RemoveBillboard(id)
-                end
-            end
-            return
-        end
-
-        local myRoot = Adapter.GetRootPart()
+    -- Search for the finish line / top part or goal in Tower of Hell
+    local winPart = Core.Services.Workspace:FindFirstChild("Finish") or Core.Services.Workspace:FindFirstChild("Top") or Core.Services.Workspace:FindFirstChild("Goal")
+    
+    -- Fallback: Scan workspace descendants for finishing ring/carpet
+    if not winPart then
         for _, obj in ipairs(Core.Services.Workspace:GetDescendants()) do
-            local name = obj.Name:lower()
-            if obj:IsA("BasePart") or obj:IsA("Model") then
-                if name:find("mask") or name:find("extinguisher") or name:find("seatbelt") or name:find("door") or name:find("valve") or name:find("repair") or name:find("oxygen") then
-                    local targetPart = obj:IsA("Model") and (obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")) or obj
-                    if targetPart then
-                        local id = "TASK_" .. obj:GetDebugId()
-                        local bill = Adapter.CreateOrGetBillboard(id, targetPart, Core.Config.Theme.TaskObj)
-                        bill.Enabled = true
-
-                        local distStr = ""
-                        if Core.State.DistanceIndicators and myRoot then
-                            local dist = math.floor((myRoot.Position - targetPart.Position).Magnitude)
-                            distStr = string.format(" [%dm]", dist)
-                        end
-
-                        local lbl = bill:FindFirstChild("Title")
-                        if lbl then
-                            lbl.Text = string.format("🔧 %s%s", obj.Name, distStr)
-                        end
-                    end
-                end
-            end
-        end
-    end)
-end
-
-function Features.InitSystemESP()
-    Core.Connections.SystemESP = Core.Services.RunService.RenderStepped:Connect(function()
-        if not Core.State.SystemESP then
-            for id, _ in pairs(Core.Cache.Billboards) do
-                if id:sub(1, 4) == "SYS_" then
-                    Adapter.RemoveBillboard(id)
-                end
-            end
-            return
-        end
-
-        local myRoot = Adapter.GetRootPart()
-        for _, obj in ipairs(Core.Services.Workspace:GetDescendants()) do
-            local name = obj.Name:lower()
-            if name:find("fuel") or name:find("engine") or name:find("pressure") or name:find("generator") or name:find("tank") then
-                local targetPart = obj:IsA("Model") and (obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")) or (obj:IsA("BasePart") and obj)
-                if targetPart then
-                    local id = "SYS_" .. obj:GetDebugId()
-                    local bill = Adapter.CreateOrGetBillboard(id, targetPart, Core.Config.Theme.System)
-                    bill.Enabled = true
-
-                    local val = obj:FindFirstChild("Level") or obj:FindFirstChild("Value") or obj:FindFirstChild("Health")
-                    valStr = val and string.format(" (%s)", tostring(val.Value)) or ""
-
-                    local distStr = ""
-                    if Core.State.DistanceIndicators and myRoot then
-                        local dist = math.floor((myRoot.Position - targetPart.Position).Magnitude)
-                        distStr = string.format(" [%dm]", dist)
-                    end
-
-                    local lbl = bill:FindFirstChild("Title")
-                    if lbl then
-                        lbl.Text = string.format("⚡ %s%s%s", obj.Name, valStr, distStr)
-                    end
-                end
-            end
-        end
-    end)
-end
-
-function Features.InitAutoEquipEmergency()
-    local emergencyKeywords = { "mask", "oxygen", "extinguisher", "fire", "gear", "life", "vest", "parachute", "flashlight" }
-
-    local function checkAndEquipTool(tool)
-        if not Core.State.AutoEquipEmergency then return end
-        if not tool or not tool:IsA("Tool") then return end
-
-        local toolName = tool.Name:lower()
-        for _, kw in ipairs(emergencyKeywords) do
-            if toolName:find(kw) then
-                local hum = Adapter.GetHumanoid()
-                if hum then
-                    hum:EquipTool(tool)
-                end
+            if obj:IsA("BasePart") and (obj.Name:lower():find("finish") or obj.Name:lower():find("win") or obj.Name:lower():find("top")) then
+                winPart = obj
                 break
             end
         end
     end
 
-    Core.Connections.AutoEquip = Core.Services.RunService.Heartbeat:Connect(function()
-        if not Core.State.AutoEquipEmergency then return end
+    if winPart then
+        root.CFrame = winPart.CFrame + Vector3.new(0, 3, 0)
+    else
+        -- Absolute default height backup if specific part isn't named
+        root.CFrame = CFrame.new(0, 350, 0)
+    end
+end
 
-        local backpack = Core.LocalPlayer:FindFirstChildOfClass("Backpack")
-        if backpack then
-            for _, item in ipairs(backpack:GetChildren()) do
-                checkAndEquipTool(item)
+function Exploits.InitGodmode()
+    Core.Connections.Godmode = Core.Services.RunService.Heartbeat:Connect(function()
+        if not Core.State.Godmode then return end
+        local char = Adapter.GetCharacter()
+        if char then
+            for _, part in ipairs(char:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    -- Disable touch interest to bypass kill bricks
+                    local touchInterest = part:FindFirstChild("TouchInterest")
+                    if touchInterest then
+                        touchInterest:Destroy()
+                    end
+                end
             end
         end
     end)
+end
 
-    local backpack = Core.LocalPlayer:FindFirstChildOfClass("Backpack") or Core.LocalPlayer:WaitForChild("Backpack", 5)
-    if backpack then
-        backpack.ChildAdded:Connect(function(child)
-            task.wait(0.1)
-            checkAndEquipTool(child)
-        end)
+function Exploits.InitInfiniteJump()
+    Core.Connections.InfJump = Core.Services.UserInputService.JumpRequest:Connect(function()
+        if Core.State.InfiniteJump then
+            local hum = Adapter.GetHumanoid()
+            if hum then
+                hum:ChangeState(Enum.HumanoidStateType.Jumping)
+            end
+        end
+    end)
+end
+
+function Exploits.InitNoclip()
+    Core.Connections.Noclip = Core.Services.RunService.Stepped:Connect(function()
+        if not Core.State.Noclip then return end
+        local char = Adapter.GetCharacter()
+        if char then
+            for _, part in ipairs(char:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
+        end
+    end)
+end
+
+function Exploits.ToggleSpeed(enabled)
+    local hum = Adapter.GetHumanoid()
+    if hum then
+        hum.WalkSpeed = enabled and 32 or 16
+    end
+end
+
+function Exploits.ToggleJumpPower(enabled)
+    local hum = Adapter.GetHumanoid()
+    if hum then
+        hum.UseJumpPower = true
+        hum.JumpPower = enabled and 100 or 50
     end
 end
 
 -- ============================================================================
--- UI BUILDER (PUMPKIN NYZORA HUB DESIGN)
+-- UI BUILDER (NYZORA HUB - PUMPKIN THEME)
 -- ============================================================================
 local UI = {}
 
-function UI.CreateToggleSwitchRow(parent, labelText, stateKey)
+function UI.CreateButtonRow(parent, labelText, callback)
+    local card = Instance.new("Frame")
+    card.Size = UDim2.new(1, 0, 0, 42)
+    card.BackgroundColor3 = Core.Config.Theme.CardBg
+    card.BackgroundTransparency = Core.Config.Theme.CardBgTransparency
+    card.BorderSizePixel = 0
+    card.Parent = parent
+
+    local cardCorner = Instance.new("UICorner")
+    cardCorner.CornerRadius = UDim.new(0, 14)
+    cardCorner.Parent = card
+
+    local cardStroke = Instance.new("UIStroke")
+    cardStroke.Color = Core.Config.Theme.PumpkinBorder
+    cardStroke.Thickness = 1.2
+    cardStroke.Transparency = 0.3
+    cardStroke.Parent = card
+
+    local label = Instance.new("TextLabel")
+    label.Text = labelText
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = 12
+    label.TextColor3 = Core.Config.Theme.TextDark
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Position = UDim2.new(0, 14, 0, 0)
+    label.Size = UDim2.new(0.6, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Parent = card
+
+    local btn = Instance.new("TextButton")
+    btn.Text = "Execute"
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 11
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Size = UDim2.new(0, 80, 0, 26)
+    btn.Position = UDim2.new(1, -90, 0.5, -13)
+    btn.BackgroundColor3 = Core.Config.Theme.ToggleOn
+    btn.BorderSizePixel = 0
+    btn.Parent = card
+
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(1, 0)
+    btnCorner.Parent = btn
+
+    btn.MouseButton1Click:Connect(callback)
+    return card
+end
+
+function UI.CreateToggleSwitchRow(parent, labelText, stateKey, callback)
     local card = Instance.new("Frame")
     card.Size = UDim2.new(1, 0, 0, 42)
     card.BackgroundColor3 = Core.Config.Theme.CardBg
@@ -346,6 +256,7 @@ function UI.CreateToggleSwitchRow(parent, labelText, stateKey)
         local active = Core.State[stateKey]
         switchBg.BackgroundColor3 = active and Core.Config.Theme.ToggleOn or Core.Config.Theme.ToggleOff
         knob.Position = active and UDim2.new(1, -22, 0.5, -10) or UDim2.new(0, 2, 0.5, -10)
+        if callback then callback(active) end
     end)
 
     return card
@@ -353,7 +264,7 @@ end
 
 function UI.BuildMobileUI()
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "NyzoraHubGui"
+    ScreenGui.Name = "NyzoraToHGui"
     ScreenGui.ResetOnSpawn = false
 
     pcall(function() ScreenGui.Parent = Core.Services.CoreGui end)
@@ -389,7 +300,7 @@ function UI.BuildMobileUI()
     Header.Parent = Main
 
     local HeaderTitle = Instance.new("TextLabel")
-    HeaderTitle.Text = Core.Config.HubName
+    HeaderTitle.Text = Core.Config.HubName .. " (ToH)"
     HeaderTitle.Font = Enum.Font.GothamBold
     HeaderTitle.TextSize = 14
     HeaderTitle.TextColor3 = Core.Config.Theme.TextDark
@@ -448,7 +359,7 @@ function UI.BuildMobileUI()
         OpenBtn.Visible = false
     end)
 
-    -- Container for Toggles
+    -- Container for Toggles / Features
     local Container = Instance.new("Frame")
     Container.Size = UDim2.new(1, -24, 1, -56)
     Container.Position = UDim2.new(0, 12, 0, 48)
@@ -460,12 +371,12 @@ function UI.BuildMobileUI()
     layout.Padding = UDim.new(0, 6)
     layout.Parent = Container
 
-    UI.CreateToggleSwitchRow(Container, "Passenger ESP", "PassengerESP")
-    UI.CreateToggleSwitchRow(Container, "Flight Crew ESP", "CrewESP")
-    UI.CreateToggleSwitchRow(Container, "Distance Indicators", "DistanceIndicators")
-    UI.CreateToggleSwitchRow(Container, "Task & Object ESP", "TaskESP")
-    UI.CreateToggleSwitchRow(Container, "Fuel & System ESP", "SystemESP")
-    UI.CreateToggleSwitchRow(Container, "Auto-Equip Emergency Items", "AutoEquipEmergency")
+    UI.CreateButtonRow(Container, "Instant Win (Teleport)", Exploits.InstantWin)
+    UI.CreateToggleSwitchRow(Container, "Godmode (Bypass Kills)", "Godmode")
+    UI.CreateToggleSwitchRow(Container, "Infinite Jump", "InfiniteJump")
+    UI.CreateToggleSwitchRow(Container, "Noclip (Walk Through Walls)", "Noclip")
+    UI.CreateToggleSwitchRow(Container, "Speed Boost (32 WS)", "SpeedBoost", Exploits.ToggleSpeed)
+    UI.CreateToggleSwitchRow(Container, "Super Jump Power", "JumpPowerBoost", Exploits.ToggleJumpPower)
 
     return ScreenGui
 end
@@ -475,11 +386,10 @@ end
 -- ============================================================================
 function Core.Init()
     UI.BuildMobileUI()
-    Features.InitPlayerESP()
-    Features.InitTaskESP()
-    Features.InitSystemESP()
-    Features.InitAutoEquipEmergency()
-    print("[" .. Core.Config.HubName .. "] Loaded successfully.")
+    Exploits.InitGodmode()
+    Exploits.InitInfiniteJump()
+    Exploits.InitNoclip()
+    print("[" .. Core.Config.HubName .. "] Tower of Hell Edition Loaded Successfully.")
 end
 
 Core.Init()
