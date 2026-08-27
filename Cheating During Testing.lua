@@ -7,10 +7,12 @@
 
 local Core = {
     Config = {
-        Version = "2.7.0-IconVisibilityFix",
+        Version = "2.8.0-ImageAssetFix",
         HubName = "XORQEN HUB",
-        -- Replace with your uploaded Roblox Decal/Asset ID if needed:
-        HubAssetId = "rbxassetid://10723345518", 
+        
+        -- 👇 REPLACE THE DIGITS BELOW WITH YOUR ROBLOX DECAL / IMAGE ID 👇
+        HubAssetId = "10723345518", 
+        
         Theme = {
             Turquoise = Color3.fromRGB(64, 224, 208),     -- Main Accent Color
             TurquoiseDark = Color3.fromRGB(15, 55, 60),    -- Background Tint
@@ -38,6 +40,15 @@ local Core = {
 }
 
 Core.LocalPlayer = Core.Services.Players.LocalPlayer
+
+-- Helper function to format any ID safely
+local function GetFormattedImage(id)
+    id = tostring(id):gsub("%D", "") -- Remove non-numeric characters
+    if #id == 0 then
+        return "rbxassetid://10723345518"
+    end
+    return "rbxassetid://" .. id
+end
 
 -- ============================================================================
 -- GAME ADAPTER
@@ -349,15 +360,14 @@ function UI.BuildMobileUI()
     Header.BackgroundTransparency = 1
     Header.Parent = Main
 
-    -- Identity Profile Image Badge (Explicitly Positioned On Left)
+    -- Identity Profile Image Badge
     local HeaderIcon = Instance.new("ImageLabel")
     HeaderIcon.Name = "HubIcon"
-    HeaderIcon.Size = UDim2.new(0, 26, 0, 26)
-    HeaderIcon.Position = UDim2.new(0, 0, 0.5, -13)
+    HeaderIcon.Size = UDim2.new(0, 24, 0, 24)
+    HeaderIcon.Position = UDim2.new(0, 0, 0.5, -12)
     HeaderIcon.BackgroundTransparency = 1
-    HeaderIcon.Image = Core.Config.HubAssetId
-    HeaderIcon.ImageColor3 = Color3.fromRGB(255, 255, 255)
-    HeaderIcon.ZIndex = 5
+    HeaderIcon.Image = GetFormattedImage(Core.Config.HubAssetId)
+    HeaderIcon.ZIndex = 10
     HeaderIcon.Parent = Header
 
     local HeaderIconCorner = Instance.new("UICorner")
@@ -371,10 +381,10 @@ function UI.BuildMobileUI()
     HeaderTitle.TextSize = 13
     HeaderTitle.TextColor3 = Core.Config.Theme.Turquoise
     HeaderTitle.TextXAlignment = Enum.TextXAlignment.Left
-    HeaderTitle.Position = UDim2.new(0, 34, 0, 0)
+    HeaderTitle.Position = UDim2.new(0, 32, 0, 0)
     HeaderTitle.Size = UDim2.new(0.65, 0, 1, 0)
     HeaderTitle.BackgroundTransparency = 1
-    HeaderTitle.ZIndex = 5
+    HeaderTitle.ZIndex = 10
     HeaderTitle.Parent = Header
 
     -- Close Button
@@ -389,7 +399,7 @@ function UI.BuildMobileUI()
     CloseBtn.BorderSizePixel = 0
     CloseBtn.Size = UDim2.new(0, 24, 0, 24)
     CloseBtn.Position = UDim2.new(1, -26, 0, 4)
-    CloseBtn.ZIndex = 5
+    CloseBtn.ZIndex = 10
     CloseBtn.Parent = Header
 
     local CloseCorner = Instance.new("UICorner")
@@ -426,8 +436,8 @@ function UI.BuildMobileUI()
     OpenIcon.Size = UDim2.new(0, 24, 0, 24)
     OpenIcon.Position = UDim2.new(0, 8, 0.5, -12)
     OpenIcon.BackgroundTransparency = 1
-    OpenIcon.Image = Core.Config.HubAssetId
-    OpenIcon.ZIndex = 5
+    OpenIcon.Image = GetFormattedImage(Core.Config.HubAssetId)
+    OpenIcon.ZIndex = 10
     OpenIcon.Parent = OpenBtn
 
     local OpenIconCorner = Instance.new("UICorner")
@@ -444,7 +454,7 @@ function UI.BuildMobileUI()
     OpenText.Position = UDim2.new(0, 38, 0, 0)
     OpenText.Size = UDim2.new(1, -38, 1, 0)
     OpenText.BackgroundTransparency = 1
-    OpenText.ZIndex = 5
+    OpenText.ZIndex = 10
     OpenText.Parent = OpenBtn
 
     -- Toggle Window Display
