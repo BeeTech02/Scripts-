@@ -1,12 +1,12 @@
 -- ============================================================================
 -- VORYZEN HUB — CLEAN ALL THE LEAVES (ROBLOX)
--- Fixed Mobile UI & Responsive Scrolling Layout
--- Version: 1.3.1-VoryzenFixed
+-- Fixed Layout: Sticky Header + Scrolling Feature Container
+-- Version: 1.3.2-VoryzenSticky
 -- ============================================================================
 
 local Core = {
     Config = {
-        Version = "1.3.1-VoryzenFixed",
+        Version = "1.3.2-VoryzenSticky",
         HubName = "VORYZEN HUB",
         Theme = {
             MainBg = Color3.fromRGB(155, 120, 195),          -- Amethyst Glass Panel
@@ -155,7 +155,7 @@ function Exploits.ToggleJumpPower(enabled)
 end
 
 -- ============================================================================
--- UI BUILDER (FIXED LAYOUT)
+-- UI BUILDER (STICKY HEADER + SCROLLING CONTAINER)
 -- ============================================================================
 local UI = {}
 
@@ -224,13 +224,13 @@ end
 
 function UI.BuildMobileUI()
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "VoryzenLeavesFixedGui"
+    ScreenGui.Name = "VoryzenLeavesStickyGui"
     ScreenGui.ResetOnSpawn = false
 
     pcall(function() ScreenGui.Parent = Core.Services.CoreGui end)
     if not ScreenGui.Parent then ScreenGui.Parent = Core.LocalPlayer:WaitForChild("PlayerGui") end
 
-    -- Main Window Panel
+    -- Main Window Panel (Static Background Holder)
     local Main = Instance.new("Frame")
     Main.Name = "MainWindow"
     Main.Size = UDim2.new(0, 320, 0, 380)
@@ -252,11 +252,13 @@ function UI.BuildMobileUI()
     MainStroke.Transparency = 0.2
     MainStroke.Parent = Main
 
-    -- Header Section
+    -- Sticky Header Section (Stays completely fixed at top)
     local Header = Instance.new("Frame")
+    Header.Name = "StickyHeader"
     Header.Size = UDim2.new(1, -20, 0, 36)
-    Header.Position = UDim2.new(0, 10, 0, 8)
+    Header.Position = UDim2.new(0, 10, 0, 10)
     Header.BackgroundTransparency = 1
+    Header.ZIndex = 5
     Header.Parent = Main
 
     local HeaderTitle = Instance.new("TextLabel")
@@ -268,9 +270,10 @@ function UI.BuildMobileUI()
     HeaderTitle.Position = UDim2.new(0, 8, 0, 0)
     HeaderTitle.Size = UDim2.new(0.7, 0, 1, 0)
     HeaderTitle.BackgroundTransparency = 1
+    HeaderTitle.ZIndex = 5
     HeaderTitle.Parent = Header
 
-    -- Close Button
+    -- Close Button (Fixed on Header)
     local CloseBtn = Instance.new("TextButton")
     CloseBtn.Name = "CloseButton"
     CloseBtn.Text = "×"
@@ -281,6 +284,7 @@ function UI.BuildMobileUI()
     CloseBtn.BorderSizePixel = 0
     CloseBtn.Size = UDim2.new(0, 26, 0, 26)
     CloseBtn.Position = UDim2.new(1, -26, 0.5, -13)
+    CloseBtn.ZIndex = 6
     CloseBtn.Parent = Header
 
     local CloseCorner = Instance.new("UICorner")
@@ -318,10 +322,11 @@ function UI.BuildMobileUI()
         OpenBtn.Visible = false
     end)
 
-    -- Scrolling Frame Container for All Options
+    -- Scrolling Frame Container (Only widgets scroll inside here)
     local ScrollContainer = Instance.new("ScrollingFrame")
-    ScrollContainer.Size = UDim2.new(1, -20, 1, -52)
-    ScrollContainer.Position = UDim2.new(0, 10, 0, 46)
+    ScrollContainer.Name = "FeaturesScrollContainer"
+    ScrollContainer.Size = UDim2.new(1, -20, 1, -58)
+    ScrollContainer.Position = UDim2.new(0, 10, 0, 52)
     ScrollContainer.BackgroundTransparency = 1
     ScrollContainer.BorderSizePixel = 0
     ScrollContainer.CanvasSize = UDim2.new(0, 0, 0, 530)
@@ -357,7 +362,7 @@ function Core.Init()
     Exploits.InitAutoSell()
     Exploits.InitInfiniteJump()
     Exploits.InitNoclip()
-    print("[" .. Core.Config.HubName .. "] Fixed Leaf Hub Loaded Successfully.")
+    print("[" .. Core.Config.HubName .. "] Sticky Header Leaf Hub Loaded Successfully.")
 end
 
 Core.Init()
