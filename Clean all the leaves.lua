@@ -1,12 +1,12 @@
 -- ============================================================================
 -- VORYZEN HUB — CLEAN ALL THE LEAVES (ROBLOX)
--- Stable Utilities Edition (Removed Non-Working Auto-Farms)
--- Version: 1.4.0-VoryzenStable
+-- Stable Utilities Edition with Dynamic Adjustment Sliders
+-- Version: 1.5.0-VoryzenDynamic
 -- ============================================================================
 
 local Core = {
     Config = {
-        Version = "1.4.0-VoryzenStable",
+        Version = "1.5.0-VoryzenDynamic",
         HubName = "VORYZEN HUB",
         GameName = "Clean All The Leaves",
         Theme = {
@@ -25,7 +25,9 @@ local Core = {
         InfiniteJump = false,
         Noclip = false,
         SpeedBoost = false,
-        JumpPowerBoost = false
+        JumpPowerBoost = false,
+        SpeedValue = 32,
+        JumpPowerValue = 100
     },
     Services = {
         Players = game:GetService("Players"),
@@ -80,10 +82,25 @@ function Exploits.InitNoclip()
     end)
 end
 
+function Exploits.UpdateSpeed()
+    local hum = Adapter.GetHumanoid()
+    if hum and Core.State.SpeedBoost then
+        hum.WalkSpeed = Core.State.SpeedValue
+    end
+end
+
 function Exploits.ToggleSpeed(enabled)
     local hum = Adapter.GetHumanoid()
     if hum then
-        hum.WalkSpeed = enabled and 32 or 16
+        hum.WalkSpeed = enabled and Core.State.SpeedValue or 16
+    end
+end
+
+function Exploits.UpdateJumpPower()
+    local hum = Adapter.GetHumanoid()
+    if hum and Core.State.JumpPowerBoost then
+        hum.UseJumpPower = true
+        hum.JumpPower = Core.State.JumpPowerValue
     end
 end
 
@@ -91,16 +108,132 @@ function Exploits.ToggleJumpPower(enabled)
     local hum = Adapter.GetHumanoid()
     if hum then
         hum.UseJumpPower = true
-        hum.JumpPower = enabled and 100 or 50
+        hum.JumpPower = enabled and Core.State.JumpPowerValue or 50
     end
 end
 
 -- ============================================================================
--- UI BUILDER
+-- UI BUILDER WITH DYNAMIC SLIDER SUPPORT
 -- ============================================================================
 local UI = {}
 
-function UI.CreateToggleSwitchRow(parent, labelText, stateKey, callback)
+function UI.CreateSliderRow(parent, labelText, minVal, maxVal, stateKey, onValueChanged)
+    local sliderCard = Instance.new("Frame")
+    sliderCard.Name = stateKey .. "SliderCard"
+    sliderCard.Size = UDim2.new(1, 0, 0, 50)
+    sliderCard.BackgroundColor3 = Core.Config.Theme.CardBg
+    sliderCard.BackgroundTransparency = Core.Config.Theme.CardBgTransparency
+    sliderCard.BorderSizePixel = 0
+    sliderCard.Visible = false
+    sliderCard.Parent = parent
+
+    local cardCorner = Instance.new("UICorner")
+    cardCorner.CornerRadius = UDim.new(0, 12)
+    cardCorner.Parent = sliderCard
+
+    local cardStroke = Instance.new("UIStroke")
+    cardStroke.Color = Core.Config.Theme.AmethystBorder
+    cardStroke.Thickness = 1.0
+    cardStroke.Transparency = 0.4
+    cardStroke.Parent = sliderCard
+
+    local label = Instance.new("TextLabel")
+    label.Text = labelText
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = 10
+    label.TextColor3 = Core.Config.Theme.TextDark
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Position = UDim2.new(0, 12, 0, 6)
+    label.Size = UDim2.new(0.7, 0, 0, 18)
+    label.BackgroundTransparency = 1
+    label.Parent = sliderCard
+
+    local valueLabel = Instance.new("TextLabel")
+    valueLabel.Text = tostring(Core.State[stateKey])
+    valueLabel.Font = Enum.Font.GothamBold
+    valueLabel.TextSize = 10
+    valueLabel.TextColor3 = Core.Config.Theme.TextDark
+    valueLabel.TextXAlignment = Enum.TextXAlignment.Right
+    valueLabel.Position = UDim2.new(0.7, 0, 0, 6)
+    valueLabel.Size = UDim2.new(0.3, -12, 0, 18)
+    valueLabel.BackgroundTransparency = 1
+    valueLabel.Parent = sliderCard
+
+    local sliderBg = Instance.new("Frame")
+    sliderBg.Size = UDim2.new(1, -24, 0, 8)
+    sliderBg.Position = UDim2.new(0, 12, 0, 32)
+    sliderBg.BackgroundColor3 = Core.Config.Theme.ToggleOff
+    sliderBg.BorderSizePixel = 0
+    sliderBg.Parent = sliderCard
+
+    local sliderBgCorner = Instance.new("UICorner")
+    sliderBgCorner.CornerRadius = UDim.new(1, 0)
+    sliderBgCorner.Parent = sliderBg
+
+    local sliderFill = Instance.new("Frame")
+    local initialRatio = math.clamp((Core.State[stateKey] - minVal) / (maxVal - minVal), 0, 1)
+    sliderFill.Size = UDim2.new(initialRatio, 0, 1, 0)
+    sliderFill.BackgroundColor3 = Core.Config.Theme.ToggleOn
+    sliderFill.BorderSizePixel = 0
+    sliderFill.Parent = sliderBg
+
+    local sliderFillCorner = Instance.new("UICorner")
+    sliderFillCorner.CornerRadius = UDim.new(1, 0)
+    sliderFillCorner.Parent = sliderFill
+
+    local handle = Instance.new("TextButton")
+    handle.Text = ""
+    handle.Size = UDim2.new(0, 16, 0, 16)
+    handle.AnchorPoint = Vector2.new(0.5, 0.5)
+    handle.Position = UDim2.new(initialRatio, 0, 0.5, 0)
+    handle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    handle.BorderSizePixel = 0
+    handle.Parent = sliderBg
+
+    local handleCorner = Instance.new("UICorner")
+    handleCorner.CornerRadius = UDim.new(1, 0)
+    handleCorner.Parent = handle
+
+    local dragging = false
+    local function updateInput(input)
+        local pos = math.clamp((input.Position.X - sliderBg.AbsolutePosition.X) / sliderBg.AbsoluteSize.X, 0, 1)
+        local calculatedVal = math.floor(minVal + ((maxVal - minVal) * pos))
+        Core.State[stateKey] = calculatedVal
+        sliderFill.Size = UDim2.new(pos, 0, 1, 0)
+        handle.Position = UDim2.new(pos, 0, 0.5, 0)
+        valueLabel.Text = tostring(calculatedVal)
+        if onValueChanged then onValueChanged(calculatedVal) end
+    end
+
+    handle.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+        end
+    end)
+
+    sliderBg.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            updateInput(input)
+        end
+    end)
+
+    Core.Services.UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
+        end
+    end)
+
+    Core.Services.UserInputService.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            updateInput(input)
+        end
+    end)
+
+    return sliderCard
+end
+
+function UI.CreateToggleSwitchRow(parent, labelText, stateKey, callback, sliderCardRef)
     local card = Instance.new("Frame")
     card.Size = UDim2.new(1, 0, 0, 42)
     card.BackgroundColor3 = Core.Config.Theme.CardBg
@@ -157,6 +290,11 @@ function UI.CreateToggleSwitchRow(parent, labelText, stateKey, callback)
         local active = Core.State[stateKey]
         switchBg.BackgroundColor3 = active and Core.Config.Theme.ToggleOn or Core.Config.Theme.ToggleOff
         knob.Position = active and UDim2.new(1, -22, 0.5, -10) or UDim2.new(0, 2, 0.5, -10)
+        
+        if sliderCardRef then
+            sliderCardRef.Visible = active
+        end
+
         if callback then callback(active) end
     end)
 
@@ -165,7 +303,7 @@ end
 
 function UI.BuildMobileUI()
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "VoryzenStableGui"
+    ScreenGui.Name = "VoryzenDynamicGui"
     ScreenGui.ResetOnSpawn = false
 
     pcall(function() ScreenGui.Parent = Core.Services.CoreGui end)
@@ -174,8 +312,8 @@ function UI.BuildMobileUI()
     -- Main Window Panel
     local Main = Instance.new("Frame")
     Main.Name = "MainWindow"
-    Main.Size = UDim2.new(0, 320, 0, 260)
-    Main.Position = UDim2.new(0.5, -160, 0.5, -130)
+    Main.Size = UDim2.new(0, 320, 0, 340)
+    Main.Position = UDim2.new(0.5, -160, 0.5, -170)
     Main.BackgroundColor3 = Core.Config.Theme.MainBg
     Main.BackgroundTransparency = Core.Config.Theme.MainBgTransparency
     Main.BorderSizePixel = 0
@@ -272,7 +410,7 @@ function UI.BuildMobileUI()
     ScrollContainer.Position = UDim2.new(0, 10, 0, 50)
     ScrollContainer.BackgroundTransparency = 1
     ScrollContainer.BorderSizePixel = 0
-    ScrollContainer.CanvasSize = UDim2.new(0, 0, 0, 200)
+    ScrollContainer.CanvasSize = UDim2.new(0, 0, 0, 360)
     ScrollContainer.ScrollBarThickness = 3
     ScrollContainer.Parent = Main
 
@@ -281,10 +419,22 @@ function UI.BuildMobileUI()
     layout.Padding = UDim.new(0, 6)
     layout.Parent = ScrollContainer
 
+    -- Instantiate Sliders first so toggles can reference them
+    local speedSlider = UI.CreateSliderRow(ScrollContainer, "Adjust Speed Value", 16, 120, "SpeedValue", function(val)
+        Core.State.SpeedValue = val
+        Exploits.UpdateSpeed()
+    end)
+
+    local jumpSlider = UI.CreateSliderRow(ScrollContainer, "Adjust Jump Power", 50, 250, "JumpPowerValue", function(val)
+        Core.State.JumpPowerValue = val
+        Exploits.UpdateJumpPower()
+    end)
+
+    -- Instantiate Toggles with reference to their respective dynamic sliders
     UI.CreateToggleSwitchRow(ScrollContainer, "Infinite Jump", "InfiniteJump")
     UI.CreateToggleSwitchRow(ScrollContainer, "Noclip", "Noclip")
-    UI.CreateToggleSwitchRow(ScrollContainer, "Speed Boost (32 WS)", "SpeedBoost", Exploits.ToggleSpeed)
-    UI.CreateToggleSwitchRow(ScrollContainer, "Super Jump Power", "JumpPowerBoost", Exploits.ToggleJumpPower)
+    UI.CreateToggleSwitchRow(ScrollContainer, "Speed Boost", "SpeedBoost", Exploits.ToggleSpeed, speedSlider)
+    UI.CreateToggleSwitchRow(ScrollContainer, "Super Jump Power", "JumpPowerBoost", Exploits.ToggleJumpPower, jumpSlider)
 
     return ScreenGui
 end
